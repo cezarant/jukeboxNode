@@ -1,0 +1,24 @@
+<html>
+	<head>
+    <script src="https://code.jquery.com/jquery-3.1.1.js"></script>	
+	<link href="select2.css" rel="stylesheet"/>
+    <script src="select2.js"></script>
+    <script>
+        $(document).ready(function() 
+		{ 
+			$("#e1").select2(); 
+			$("#e1").on('select2:select', function (e)
+			{
+				var data = e.params.data;
+				console.log(data.id);
+			});
+		});		
+    </script>
+	</head>
+<body>
+    <select id="e1">
+        <option value="AL.mp4">Rollings Stones - Start me Up</option>        
+        <option value="WY.mp4">Pink Floyd - Confortably Numb</option>
+    </select>
+</body>
+</html>

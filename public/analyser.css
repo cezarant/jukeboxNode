@@ -1,0 +1,13 @@
+	body 
+	{
+	  padding-top: 2px;
+	  padding-bottom: 20px;
+	}		
+	.mensagens
+	{
+		height: 200px;
+		overflow-y:scroll; 
+	}	
+	.rowVideo {
+		padding-top: 2px;		
+	}
