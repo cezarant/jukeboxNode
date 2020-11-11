@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>JukeBox Nodejs</title>
+<title>Example of Bootstrap 3 Responsive Navbar</title>
 <style>
 	.navbar{
 		margin-top: 20px;
@@ -22,38 +22,31 @@
 		</nav>
 		<div class="container">
 			<div class="row">
-				  <div class="col-sm-8">
-				       <video id="plTeste"  width="100%" controls="controls"></video>	
-				  </div>
-				  <div class="col-sm-4">
-				      <ul id="ulVideos"				  			  	   	
-				      </ul>
-				  </div>
-			</div>
-		'	<div class="row">
-				  <table>
-					    <tr>
-					       <td><span> Telemetria:</span></td>
-					       <td><span  id="txtTelemetria">-</span></td>
-					    </tr>				     	
-				  </table>			      
-			</div>	
-		</div>
-		<div id="luzAcessa" class="luzAcesa"></div>
-               <div id="luzApagada" class="luzApagada">
-				<div class="msg">
-					<label style="color:Black;font-size:18px">
-					Escolha uma opção...</label>					
+			    <div class="col"> 
+					<video id="plTeste"  width="600" controls="controls"></video>
 				</div>
-               </div>	
-    </div>		
+				<div class="col"> 
+					<ul id="ulVideos"></ul>
+				</div>
+			</div>
+			<div class="row">
+			   <input id="btnPlay" type="button" onclick="chooseMovie()" value="Play" />
+			   <input id="btnFoward" type="button" onclick="forwardMovie()" value=">>" />
+			   <input id="btnPush" type="button" onclick="pushStack()"  value="Push" /> 		   			   
+			</div>			
+			<div class="row">
+		        <select id="e1">
+					<option value="Crowley.mp4">Ozzy Osborne - Mr.Crowley</option>        
+					<option value="Start_me_up.mp4">Rollings Stones - Start me Up</option>        
+					<option value="Confortably.mp4">Pink Floyd - Confortably Numb</option>
+				</select>
+			</div>
+	</div>	
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" /> 	
 <link href="analyser.css" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
 <script src="https://code.jquery.com/jquery-3.1.1.js"></script>	
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>	
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
 <script src="socketCapture.js"></script>
 </body>
 </html>

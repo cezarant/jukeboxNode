@@ -2,16 +2,16 @@
   var media;  
   var listVideos =
   [
-	   'http://localhost:3002/video/Confortably.mp4',
-	   'http://localhost:3002/video/Crowley.mp4',
-	   'http://localhost:3002/video/Start_me_up.mp4'
+	   'http://localhost:3008/video/Confortably.mp4',
+	   'http://localhost:3008/video/Crowley.mp4',
+	   'http://localhost:3008/video/Start_me_up.mp4'
   ];
   var selectedMovie; 
   var videoStack = []; 
   var cont = 0;	  
   var movieFolder = "/movies/";
-  
-  
+  var statusDesconectado = 1; 
+ 
   $(document).ready(function(e)
   {
 	media=document.getElementById("plTeste");	 
@@ -19,22 +19,15 @@
 	{
 		verifyStack();
 	});
+	//showOptions('unplugged');
 	
-	$("#myInput").on("keyup", function()
+	/*$("#myInput").on("keyup", function()
 	{
 		var value = $(this).val().toLowerCase();
 		$("#myTable tr").filter(function() {
 			$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
 		});
-	});
-	
-	$("#e1").select2(); 
-	$("#e1").on('select2:select', function (e)
-	{
-		var data = e.params.data;
-		selectedMovie = data.id; 
-		console.log(data.id);
-	});		
+	});*/	
   });  
   $(document).keydown(function(e)
   {	
@@ -45,27 +38,25 @@
 		    elem.requestFullscreen();
 		}				
 	}
-	//if(e.keyCode == 27){ 
-	  //$('#txtSearch').focus();	 
-   	  //$('#txtSearch').val('');
-	//}
 	
 	if(e.keyCode == 32)
 	{
    	   if(media.paused){
 	      media.play();
 	   }else{ 	  
-		 media.pause(); 
+             media.pause(); 
 	   }
 	} 	
 	if (e.keyCode == 38){  	
-		avancafilme();			
+	     avancafilme();			
 	}		
   });  
-  function verifyStack(){
-	if(videoStack.length > 0){
-		selectedMovie =  videoStack.pop();
-        playMovie();		
+  function verifyStack()
+  {
+	if(videoStack.length > 0)
+	{
+	   selectedMovie =  videoStack.pop();
+           playMovie();		
 	} 
   }  
   function pushStack(){
@@ -87,20 +78,21 @@
   } 
   
   function playMovie(){
-	if(media.paused){
-		media.removeAttribute("src"); 
-		media.setAttribute('src', selectedMovie);	
-		media.pause();		
-		media.load();  
-		media.play();
-		$('#btnPlay').text('Pause');
+	if(media.paused)
+	{
+	   media.removeAttribute("src"); 
+	   media.setAttribute('src', selectedMovie);	
+	   media.pause();		
+	   media.load();  
+	   media.play();
+	   $('#btnPlay').text('Pause');
 	}else{
 	  media.pause(); 
 	  $('#btnPlay').text('Play');
 	}	
-  }  
+  } 
   function forwardMovie(){	
-	$('#txtNome').text(listVideos[cont]);
+	$('#txtTelemetria').text(listVideos[cont]);
 	selectedMovie = listVideos[cont]; 
 			
 	if((cont + 1) >= listVideos.length)
@@ -108,7 +100,27 @@
     else 
 	   cont = cont + 1; 		   
   }   
+  function showOptions(msg){
+      if(msg === 'unplugged')
+      { 	
+        acenderLuzes();
+      }else{
+      	apagarLuzes();
+      }   
+  }
+  function acenderLuzes()
+  {
+    document.getElementById('luzApagada').style.display = 'none';
+  }
+  /** Mostra mensagem "Carregando".....*/
+  function apagarLuzes() 
+  {
+    document.getElementById('luzAcessa').style.display = 'block';
+    document.getElementById('luzApagada').style.display = 'block';
+   	}
   socket.on('messageBroadcast', function(msg)
   { 	
-	$('#txtNome').text(msg);
+	console.log(msg);
+	showOptions(msg);	 
+	$('#txtTelemetria').text(msg);
   });	  	   
