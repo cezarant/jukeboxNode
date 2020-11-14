@@ -1,5 +1,5 @@
 {
-  "name": "JukeBox Nodejs",
+  "name": "jukebox nodejs",
   "version": "0.0.1",
   "description": "A JukeBox built with NodeJs and Socket.IO",
   "dependencies": {

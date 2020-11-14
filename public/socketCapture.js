@@ -1,11 +1,7 @@
   var socket = io();  
   var media;  
-  var listVideos =
-  [
-	   'http://localhost:3008/video/Confortably.mp4',
-	   'http://localhost:3008/video/Crowley.mp4',
-	   'http://localhost:3008/video/Start_me_up.mp4'
-  ];
+  var urlPrincipal = 'http://localhost:3008/video/';
+  var statusOfConnect; 
   var selectedMovie; 
   var videoStack = []; 
   var cont = 0;	  
@@ -31,7 +27,13 @@
   });  
   $(document).keydown(function(e)
   {	
-	console.log(e.keyCode);
+	// console.log(e.keyCode);
+	if (e.keyCode == 113){
+	    apagarLuzes();    
+	}
+	if (e.keyCode == 27){
+	    acenderLuzes();
+	}
 	if (e.keyCode == 13){
 		var elem = document.getElementById("plTeste");
 		if (elem.requestFullscreen){
@@ -59,7 +61,8 @@
            playMovie();		
 	} 
   }  
-  function pushStack(){
+  function pushStack()
+  {
 	if(selectedMovie !== undefined)
 	{
 		videoStack.push(selectedMovie);
@@ -69,17 +72,15 @@
 		ul.appendChild(li);	
 	}	
   }
-  function chooseMovie()
+  function chooseMovie(movieName)
   {
-	if(selectedMovie ===  undefined)
-	   selectedMovie = listVideos[Math.floor(Math.random() * (listVideos.length-1))];   
-     
-    playMovie();
-  } 
-  
+      selectedMovie = urlPrincipal + movieName; 
+      playMovie();      
+  }
   function playMovie(){
 	if(media.paused)
 	{
+	   console.log('selectedMovie',selectedMovie); 
 	   media.removeAttribute("src"); 
 	   media.setAttribute('src', selectedMovie);	
 	   media.pause();		
@@ -96,17 +97,57 @@
 	selectedMovie = listVideos[cont]; 
 			
 	if((cont + 1) >= listVideos.length)
-		cont = 0; 	
-    else 
+	    cont = 0; 	
+        else 
 	   cont = cont + 1; 		   
-  }   
-  function showOptions(msg){
-      if(msg === 'unplugged')
-      { 	
+  }     
+  
+  function convertMensagem(msg)
+  {
+      var obj = JSON.parse(msg);
+      switch(obj.tipo)
+      {
+         case 'conexao':
+           gerenciaLuzes(obj.status);	  
+           break; 
+         case 'file': 
+           adicionaItem(obj.valor);
+           break;   
+      }               	
+  }
+  function buscaDaAPI() {
+    $.ajax(
+	{
+		method: "GET",
+		url: 'http://localhost:3008/video/',
+		data: { servico: "video"}
+	})
+	.done(function(result)
+	{
+		for(var i=0;i< result.videos.length;i++){
+		    adicionaItem(result.videos[i]);
+		}			
+	})
+	.fail(function(){
+		alert( "Erro na busca do Serviço, contate o desenvolvedor.");
+	});
+  }
+  function adicionaItem(item){
+     if(statusOfConnect === 'connected'){ 
+        var urlVideo = '<li><a href="#" onclick="chooseMovie(\'{0}\')">'+ item +'</a></li>';
+        urlVideo = urlVideo.replace('{0}',item);
+        $("#ulVideos").append(urlVideo);
+     }     
+  }
+  function gerenciaLuzes(msg){      
+      $('#ulVideos').empty();
+      if(msg === 'unplugged'){        
+        statusOfConnect ='unplugged';
         acenderLuzes();
       }else{
-      	apagarLuzes();
-      }   
+        statusOfConnect ='connected'
+        apagarLuzes();
+      }  	      
   }
   function acenderLuzes()
   {
@@ -117,10 +158,10 @@
   {
     document.getElementById('luzAcessa').style.display = 'block';
     document.getElementById('luzApagada').style.display = 'block';
-   	}
+  }
   socket.on('messageBroadcast', function(msg)
   { 	
-	console.log(msg);
-	showOptions(msg);	 
+	// console.log(msg);
+	convertMensagem(msg);	 
 	$('#txtTelemetria').text(msg);
   });	  	   

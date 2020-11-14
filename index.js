@@ -10,12 +10,19 @@
   {
       res.sendFile(__dirname + '/2.html');
   });
+
+  app.get('/video', function(req, res)
+  {
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({
+				videos: ['Confortably.mp4', 'video2']
+			      }, null, 3));	     
+  }); 
   
   http.listen(port, function()
-  {
-        console.log('listening on *:'+ port);
+  {        
         var usbDetect = require('usb-detection');
- 
+ 	console.log('Pauquebrando...'); 
  
 	usbDetect.startMonitoring();
 	
@@ -27,36 +34,37 @@
 	usbDetect.on('remove:vid', function(device) { console.log('remove', device); });
 	usbDetect.on('remove:vid:pid', function(device) { console.log('remove', device); });
 	 
-	usbDetect.on('change', function(device) { console.log('change', device); });
+	usbDetect.on('change', function(device) { myfunction(device); });
 	usbDetect.on('change:vid', function(device) { console.log('change', device); });
 	usbDetect.on('change:vid:pid', function(device) { console.log('change', device); });
   });  
    
-  async function myfunction()
-  {
-     console.log('Inside of myfunction');
+  async function myfunction(device)
+  {     
+     // console.log('device changed:',device); 	
      const drivelist = require('drivelist');
      const drives = await drivelist.list();
-	
+     
      drives.forEach((drive) => {
-     	if(drive.busType == 'USB')
-     	{
-     	   console.log(drive);	
+     	if(drive.busType === 'SATA')
+     	{     	   
      	   const path = require('path');
    	   const fs = require('fs');	
-	   const directoryPath = path.join('/', '/media/cezar/disk/');	   
+	   const directoryPath = path.join('/', '/media/cezar/A8024D1D024CF23C/');	   
 	   fs.readdir(directoryPath, function (err, files)
-	   {
- 	      
-	     if (err){
-   	        return console.log('Unable to scan directory: ' + err);
-  	     } 
-	
-	     /*files.forEach(function (file) {		
-		console.log(files); 		
-	     });*/
-  	  });	  	  
-     	} 	
+	   { 	      
+	       if (err)
+   	          return console.log('Unable to scan directory: ' + err);
+  	        	
+	       var filesList = files.filter(function(e){
+    		   return path.extname(e).toLowerCase() === '.mp4'
+  	       });
+  			        	
+	       filesList.forEach(function (file) {		
+		   comunicaAoCliente('{"tipo":"file","valor":"'+ file +'"}');		   		    		
+	       });
+  	    });	  	  
+     	}  	
      });	
   }
   
@@ -67,7 +75,7 @@
   app.get('/video/:video', function(req, res)
   {
 	  const movieName  = req.params["video"];
-	  console.log(movieName); 
+	  // console.log(movieName); 
 	  const path = '/media/cezar/disk/' + movieName
 	  const fs = require('fs');	
 	  const stat = fs.statSync(path)
@@ -103,12 +111,12 @@
      var status = ""; 
    	 
      if(msg === 1)
-       status = 'connected'; 
+       status = '{ "tipo": "conexao", "status":"connected" }'; 
     
      if (msg === 2)
-       status = 'unplugged';
+       status = '{ "tipo": "conexao","status":"unplugged" }';
      
-     console.log(status);	 
+     // console.log(status);	 
      comunicaAoCliente(status);						
   } 
   function comunicaAoCliente(msg)
