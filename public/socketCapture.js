@@ -4,9 +4,12 @@
   var statusOfConnect; 
   var selectedMovie; 
   var videoStack = []; 
+  var alfabeto = ['A','B','C']; 
   var cont = 0;	  
   var movieFolder = "/movies/";
   var statusDesconectado = 1; 
+  var statusModal;
+  var contAlfabeto = 0;  
  
   $(document).ready(function(e)
   {
@@ -25,9 +28,32 @@
 		});
 	});*/	
   });  
+  function avancaAlfabeto(){
+     if((contAlfabeto === alfabeto.length))
+	contAlfabeto = 0;  
+      
+     console.log(alfabeto[contAlfabeto]);
+     contAlfabeto++;
+  }
+  function retornaAlfabeto(){
+     if(contAlfabeto === -1)
+	contAlfabeto = alfabeto.length-1;  
+      
+     console.log(alfabeto[contAlfabeto]);
+     contAlfabeto--;
+  }  
   $(document).keydown(function(e)
   {	
-	// console.log(e.keyCode);
+	console.log(e.keyCode);
+	if(e.keyCode === 37)
+	{
+	   retornaAlfabeto();	   
+	} 
+	if(e.keyCode === 39)
+	{
+	   avancaAlfabeto();
+	} 
+	
 	if (e.keyCode == 113){
 	    apagarLuzes();    
 	}

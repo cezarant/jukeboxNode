@@ -1,10 +1,11 @@
-  const express = require('express');	
-  const app = express();
-  var http = require('http').Server(app);
+  const express   = require('express');	
+  const app       = express();
+  var http        = require('http').Server(app);
   var httpCrawler = require('http');
-  var io = require('socket.io')(http);
-  var port = process.env.PORT || 3008;
-  const path = require('path');
+  var io          = require('socket.io')(http);
+  var port        = process.env.PORT || 3008;
+  const path      = require('path');
+  var urlUSB      = '/media/cezar/A8024D1D024CF23C/'; 
   app.use(express.static(path.join(__dirname, 'public')));
   app.get('/', function(req, res)
   {
@@ -22,7 +23,7 @@
   http.listen(port, function()
   {        
         var usbDetect = require('usb-detection');
- 	console.log('Pauquebrando...'); 
+ 	console.log('start...'); 
  
 	usbDetect.startMonitoring();
 	
@@ -50,7 +51,7 @@
      	{     	   
      	   const path = require('path');
    	   const fs = require('fs');	
-	   const directoryPath = path.join('/', '/media/cezar/A8024D1D024CF23C/');	   
+	   const directoryPath = path.join('/', urlUSB);	   
 	   fs.readdir(directoryPath, function (err, files)
 	   { 	      
 	       if (err)
@@ -76,7 +77,7 @@
   {
 	  const movieName  = req.params["video"];
 	  // console.log(movieName); 
-	  const path = '/media/cezar/disk/' + movieName
+	  const path = urlUSB + movieName
 	  const fs = require('fs');	
 	  const stat = fs.statSync(path)
 	  const fileSize = stat.size
@@ -115,8 +116,7 @@
     
      if (msg === 2)
        status = '{ "tipo": "conexao","status":"unplugged" }';
-     
-     // console.log(status);	 
+     	 
      comunicaAoCliente(status);						
   } 
   function comunicaAoCliente(msg)
