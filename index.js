@@ -5,12 +5,76 @@
   var io          = require('socket.io')(http);
   var port        = process.env.PORT || 3008;
   const path      = require('path');
-  var urlUSB      = '/media/cezar/A8024D1D024CF23C/'; 
+  var urlUSB      = '/media/cezar/ESD-USB/'; 
   app.use(express.static(path.join(__dirname, 'public')));
   app.get('/', function(req, res)
   {
       res.sendFile(__dirname + '/2.html');
   });
+
+  app.get('/juke',function(req,res){
+	res.setHeader('Content-Type', 'application/json');
+	var juke = {
+		"Itens":[		
+		{
+			"Letra": "A",
+			"Bandas":[				
+				{
+					"Nome":"AeroSmith",
+					"Albuns":[
+						{"Nome":"Hole in My Soul",
+					     "Musicas":[
+							{"Nome":"Hole in My Soul","NomeVideo":"hole.mp4"},
+							{"Nome":"Pink","NomeVideo":"pink.mp4"}
+						 ]},
+						{"Nome":"Armagedoom",
+					     "Musicas": [
+							 {"Nome": "Crazy","NomeVideo": "crazy.mp4"},
+							 {"Nome":"Armagedoom","NomeVideo":"armagedom.mp4"}
+						 ]}	
+					]
+				},
+				{
+					"Nome":"Alice in Chains",
+					"Albuns":
+					[
+						{"Nome":"Black hole in Sky",
+					     "Musicas":[
+							{"Nome":"Black hole in Sky","NomeVideo":"blackhole.mp4"},
+							{"Nome":"Man in the Box","NomeVideo":"ManInABox.mp4"}
+						]}	
+					]		
+				}]
+		},
+		{
+			"Letra": "B",
+			"Bandas":[				
+				{
+					"Nome":"Black Sabbath",
+					"Albuns":[
+						{
+							"Nome":"Black Sabbath",
+							"Musicas":	[
+								{"Nome":"N.I.B"},
+								{"Nome":"Children of the Grave"}
+							]
+						},
+						{
+							"Nome":"Volume 4",
+							"Musicas": [
+								{"Nome":"Changes"},
+							    {"Nome":"SuperNaut"}		
+							]					
+						}	
+					]
+				}]
+		}
+	]};
+	res.end(JSON.stringify({
+		videos: juke
+		  }, null, 3));	     	
+  }); 
+
 
   app.get('/video', function(req, res)
   {
@@ -22,7 +86,7 @@
   
   http.listen(port, function()
   {        
-        var usbDetect = require('usb-detection');
+    /*var usbDetect = require('usb-detection');
  	console.log('start...'); 
  
 	usbDetect.startMonitoring();
@@ -37,7 +101,8 @@
 	 
 	usbDetect.on('change', function(device) { myfunction(device); });
 	usbDetect.on('change:vid', function(device) { console.log('change', device); });
-	usbDetect.on('change:vid:pid', function(device) { console.log('change', device); });
+	usbDetect.on('change:vid:pid', function(device) { console.log('change', device); });*/
+	console.log('start...'); 
   });  
    
   async function myfunction(device)

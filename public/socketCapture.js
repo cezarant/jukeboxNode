@@ -3,13 +3,12 @@
   var urlPrincipal = 'http://localhost:3008/video/';
   var statusOfConnect; 
   var selectedMovie; 
-  var videoStack = []; 
-  var alfabeto = ['A','B','C']; 
+  var videoStack = [];   
   var cont = 0;	  
   var movieFolder = "/movies/";
   var statusDesconectado = 1; 
-  var statusModal;
-  var contAlfabeto = 0;  
+  var statusModal;  
+  var contNivel = 0; 
  
   $(document).ready(function(e)
   {
@@ -27,21 +26,8 @@
 			$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
 		});
 	});*/	
-  });  
-  function avancaAlfabeto(){
-     if((contAlfabeto === alfabeto.length))
-	contAlfabeto = 0;  
-      
-     console.log(alfabeto[contAlfabeto]);
-     contAlfabeto++;
-  }
-  function retornaAlfabeto(){
-     if(contAlfabeto === -1)
-	contAlfabeto = alfabeto.length-1;  
-      
-     console.log(alfabeto[contAlfabeto]);
-     contAlfabeto--;
-  }  
+  });    
+  
   $(document).keydown(function(e)
   {	
 	console.log(e.keyCode);
@@ -127,7 +113,6 @@
         else 
 	   cont = cont + 1; 		   
   }     
-  
   function convertMensagem(msg)
   {
       var obj = JSON.parse(msg);
@@ -137,7 +122,7 @@
            gerenciaLuzes(obj.status);	  
            break; 
          case 'file': 
-           adicionaItem(obj.valor);
+           setaValores(obj.valor);
            break;   
       }               	
   }
@@ -145,26 +130,22 @@
     $.ajax(
 	{
 		method: "GET",
-		url: 'http://localhost:3008/video/',
+		url: 'http://localhost:3008/juke/',
 		data: { servico: "video"}
 	})
 	.done(function(result)
-	{
-		for(var i=0;i< result.videos.length;i++){
-		    adicionaItem(result.videos[i]);
-		}			
+	{		
+		for(var i=0;i< result.videos.Itens.length;i++){
+		    juke.push(result.videos.Itens[i]);
+		}		
+		alfabeto = juke; 				        
+		setaValores(alfabeto[0].Letra,alfabeto[0].Bandas);
 	})
 	.fail(function(){
 		alert( "Erro na busca do Serviço, contate o desenvolvedor.");
 	});
   }
-  function adicionaItem(item){
-     if(statusOfConnect === 'connected'){ 
-        var urlVideo = '<li><a href="#" onclick="chooseMovie(\'{0}\')">'+ item +'</a></li>';
-        urlVideo = urlVideo.replace('{0}',item);
-        $("#ulVideos").append(urlVideo);
-     }     
-  }
+  
   function gerenciaLuzes(msg){      
       $('#ulVideos').empty();
       if(msg === 'unplugged'){        
@@ -174,7 +155,7 @@
         statusOfConnect ='connected'
         apagarLuzes();
       }  	      
-  }
+  }  
   function acenderLuzes()
   {
     document.getElementById('luzApagada').style.display = 'none';

@@ -26,8 +26,10 @@
 				       <video id="plTeste"  width="100%" controls="controls"></video>	
 				  </div>
 				  <div class="col-sm-4">
-				      <ul id="ulVideos"				  			  	   	
-				      </ul>
+				      <p id="ulVideos"></p>
+					  <ul id="subItems"></ul>
+					  <p id="musicaSel"></p>
+					  <ul id="musicasSel"></ul>
 				  </div>
 			</div>
 		'	<div class="row">
@@ -37,7 +39,12 @@
 					       <td><span  id="txtTelemetria">-</span></td>
 					    </tr>				     	
 				  </table>
-				  <input type="button" value="Teste" onclick="buscaDaAPI()" />			      
+				  <input type="button" value="Busca da API" onclick="buscaDaAPI()" />
+				  <input type="button" value="Avança" onclick="avancaAlfabeto()" />
+				  <input type="button" value="Recua" onclick="retornaAlfabeto()" />			 
+				  <input type="button" value="Entra um nivel" onclick="desceNivel()" />
+				  <input type="button" value="Volta um nivel" onclick="sobeNivel()" />	
+				  <input type="button" value="Seleciona" onclick="selecionaMusica()" />		 
 			</div>	
 		</div>
 		<div id="luzAcessa" class="luzAcesa"></div>
@@ -54,6 +61,7 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>	
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+<script src="js/navegacao.js"></script>
 <script src="socketCapture.js"></script>
 </body>
 </html>
