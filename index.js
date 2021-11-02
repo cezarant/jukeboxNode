@@ -122,7 +122,8 @@
 	       if (err)
    	          return console.log('Unable to scan directory: ' + err);
   	        	
-	       var filesList = files.filter(function(e){
+	       var filesList = filescls
+		   .filter(function(e){
     		   return path.extname(e).toLowerCase() === '.mp4'
   	       });
   			        	
