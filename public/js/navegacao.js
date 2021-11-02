@@ -48,10 +48,14 @@ function configuraAlfabeto(){
     }       
 }
 function desceNivel(){
-    contNivel++;    
-    configuraAlfabeto();
-    contVariavel = 0;  
-    carregaAlfabeto();
+    if(contNivel < 3){ 
+        contNivel++;    
+        configuraAlfabeto();
+        contVariavel = 0;  
+        carregaAlfabeto();
+    }else{
+        avancaAlfabeto();
+    } 
 }
 function sobeNivel(){
     contNivel = 0;     

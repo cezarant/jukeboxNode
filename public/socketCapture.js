@@ -17,6 +17,8 @@
 	{
 		verifyStack();
 	});
+	buscaDaAPI();
+
 	//showOptions('unplugged');
 	
 	/*$("#myInput").on("keyup", function()
@@ -70,7 +72,7 @@
 	if(videoStack.length > 0)
 	{
 	   selectedMovie =  videoStack.pop();
-           playMovie();		
+       playMovie();		
 	} 
   }  
   function pushStack()
@@ -86,8 +88,13 @@
   }
   function chooseMovie(movieName)
   {
-      selectedMovie = urlPrincipal + movieName; 
-      playMovie();      
+    if(selectedMovie === undefined)
+	{
+		selectedMovie = urlPrincipal + movieName; 
+    	playMovie();  
+	}else{
+		videoStack.push(urlPrincipal + movieName);
+	} 	    
   }
   function playMovie(){
 	if(media.paused)
@@ -135,11 +142,11 @@
 	})
 	.done(function(result)
 	{		
-		for(var i=0;i< result.videos.Itens.length;i++){
-		    juke.push(result.videos.Itens[i]);
+		for(var i=0;i< result.videos.length;i++){
+		    juke.push(result.videos[i]);
 		}		
 		alfabeto = juke; 				        
-		setaValores(alfabeto[0].Letra,alfabeto[0].Bandas);
+		setaValores(alfabeto[0].letra,alfabeto[0].bandas);
 	})
 	.fail(function(){
 		alert( "Erro na busca do Serviço, contate o desenvolvedor.");
