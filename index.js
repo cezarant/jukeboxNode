@@ -84,6 +84,7 @@ function listaDispositivosUsb(){
         { 
 	    console.log('lendo dados do arquivo de itens...'); 
  	    dicionario = alfabet.classificaDadosBrutos(JSON.parse(fs.readFileSync(listas)));
+	    
 	    fs.writeFile(nomeDiretorio, JSON.stringify(dicionario), function(err) {
 		 if(err) telemetria(1,'error', err);
 		 
@@ -99,23 +100,9 @@ function listaDispositivosUsb(){
 	        if (stderr){
 	          telemetria(1,`stderr: ${stderr}`);
 	          return;
-	        }	 
-   	                       
-		var lines = stdout.split('\n');
-	        lines.map(function(linha){	  	
-		   item = { diretorio : '', arquivo : '',  album : '' , title : '' ,composer : '', artist : '',letra : '',bandas : [] };
- 		   if((path.extname(linha).toLowerCase() === '.mp3') || 
-		      (path.extname(linha).toLowerCase() === '.wma') || 
-                      (path.extname(linha).toLowerCase() === '.wmv') ||
-		      (path.extname(linha).toLowerCase() === '.wav'))
-		   {
-			item.diretorio = diretorio; 	
-			item.arquivo = linha; 
-			itens.push(item);				
-		   }else{
-			diretorio = linha;
-		   }    	
-		});			 			
+	        }	    	                       
+ 		itens = alfabet.lendoItens(stdout); 
+		console.log('itens:',itens); 		
 		buscaDetalhesMp3(0);
 	   });
 	}
@@ -144,11 +131,12 @@ function listaDispositivosUsb(){
 			 
 		  telemetria(1,'Arquivo de itens gravado com sucesso'); 		    	 
 	      });	
-              alfabet.classificaDadosBrutos(itens);
+              dicionario = alfabet.classificaDadosBrutos(itens);
+
 	      fs.writeFile(nomeDiretorio, JSON.stringify(dicionario), function(err) {
 		 if(err) telemetria(1,'error', err);
 		 
-		clearInterval(intervalId);		 		
+		  clearInterval(intervalId);		 		
      	      }); 	
 	      telemetria('3','Reativando tela'); 	
 	   }	   
