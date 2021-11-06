@@ -33,9 +33,36 @@ function recuperaTagsArquivo(item){
 	 return item.title;
 } 
 
+function classPorDicionario(itensA,letra){
+	var ItemDicionario ; 
+	var BandasPorLetra = itensA.filter(x => x.artist !== undefined && x.artist.charAt(0) === letra);
+	var arrAlbuns  = Array.from(new Set(BandasPorLetra.map(x => x.album)));	
+	var Bandas = [];	
+	for(var j = 0;j< arrAlbuns.length;j++){
+	    var musicasAlbum = itensA.filter(x => x.album !== undefined && x.album === arrAlbuns[j]);		    	    
+	    try{			
+	   	    Bandas.push(
+		    {			
+			nome: musicasAlbum.values().next().value.artist !== undefined ? 
+                              musicasAlbum.values().next().value.artist :'',
+	  		albuns:[
+		        {
+			   nome: arrAlbuns[j], 
+			   musicas: musicasAlbum.map(x => x.arquivo)
+		  	}]	
+		    }); 		    
+	    }catch(we){ 
+       	       console.log('Erro'+ we.message); 
+            }	
+	}
+	itemDicionario = { letra: letra, bandas: Bandas };	
+	return itemDicionario; 		
+} 
+
 module.exports = {
    lendoItens,
-   recuperaTagsArquivo
+   recuperaTagsArquivo,
+   classPorDicionario	
 };
 
 

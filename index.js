@@ -3,6 +3,7 @@ const NodeID3     = require('node-id3');
 const { exec }    = require("child_process");
 const path        = require('path');
 const fs          = require('fs');
+const alfabet  = require('./alfabet.js');
 // Constantes especificas do JukeBox 
 var usbDetect = require('usb-detection'); 
 var urlUSB        = '/';   
@@ -12,9 +13,9 @@ var intervalId;
 var itens         = [];    
 var dicionario    = [];  
 var telemetriaAtiva   = true; 
-function telemetria(msg){
+function telemetria(tipo,msg){
     if(telemetriaAtiva){ 	
-       io.emit('messageBroadcast',msg);  
+       // io.emit('messageBroadcast',{ tipo: tipo , msg: msg});  
        console.log('Telemetria:',msg); 	   	
    }
 }
@@ -31,8 +32,11 @@ const port       = process.env.PORT || 3000;
 
 server.listen(port, () => {     
     usbDetect.startMonitoring();
-    usbDetect.on('add', function(){ telemetria('Pen Drive conectado...'); });	
-    usbDetect.on('remove', function(){ intervalId = setInterval(verUSBInserido, 1500); });	
+    usbDetect.on('add', function(){ telemetria(1,'Pen Drive conectado...'); });	
+    usbDetect.on('remove', function(){ 
+      telemetria(2,'removido'); 	      	
+      intervalId = setInterval(verUSBInserido, 1500); 
+    });	
     console.log('Servidor rodando em:',port); 
 });
 
@@ -50,15 +54,15 @@ io.on('connection', (socket) => {
 // ---------------------------------------------------
 // Criando 
 function listaDispositivosUsb(){	    
-        telemetria(`Buscando dispositivo...`);
+        telemetria(1,`Buscando dispositivo...`);
         exec("findmnt -t vfat -o TARGET", (error, stdout, stderr) => {	   
 	   if (error){
-             telemetria(`error: ${error.message}`);
+             telemetria(1,`error: ${error.message}`);
              return;
            }
 
            if (stderr){
-             telemetria(`stderr: ${stderr}`);
+             telemetria(1,`stderr: ${stderr}`);
              return;
            }	   
 
@@ -72,40 +76,17 @@ function listaDispositivosUsb(){
 	      }
            });	    
        });       
-  } 	  
-  function classPorDicionario(itensA,letra){
-	var BandasPorLetra = itensA.filter(x => x.artist !== undefined && x.artist.charAt(0) === letra);
-	var arrAlbuns  = Array.from(new Set(BandasPorLetra.map(x => x.album)));	
-	var Bandas = [];	
-	for(var j = 0;j< arrAlbuns.length;j++){
-	    var musicasAlbum = itensA.filter(x => x.album !== undefined && x.album === arrAlbuns[j]);		    
-	    telemetria('Preenchendo músicas nos albuns...');  	
-	    try{			
-	   	    Bandas.push(
-		    {			
-			nome: musicasAlbum.values().next().value.artist !== undefined ? 
-                              musicasAlbum.values().next().value.artist :'',
-	  		albuns:[
-		        {
-			   nome: arrAlbuns[j], 
-			   musicas: musicasAlbum.map(x => x.arquivo)
-		  	}]	
-		    }); 
-	    }catch(we){ 
-       	       telemetria('Erro lendo '+ arrAlbuns[j] +':', we.message); 
-            }	
-	}
-	dicionario.push({ letra: letra, bandas: Bandas }); 	
-  } 
+  } 	    
   function classificaDadosBrutos(dadosBrutos){
    	    for(var j = 0;j< alfabeto.length;j++)
-		classPorDicionario(dadosBrutos,alfabeto[j]); 
+		dicionario.push(alfabet.classPorDicionario(dadosBrutos,alfabeto[j])); 
 	    			    
 	    fs.writeFile(nomeDiretorio, JSON.stringify(dicionario), function(err) {
-		 if(err) telemetria('error', err);
+		 if(err) telemetria(1,'error', err);
 		 
-		 telemetria('1'); 		    	 
+		clearInterval(intervalId);		 		
 	    });		
+	    		    	 
   }  	 	
   function listaArquivos(){	
 	if (fs.existsSync('itens.json'))
@@ -116,12 +97,12 @@ function listaDispositivosUsb(){
 	}else{
             exec("ls "+ urlUSB +" -1 -R", (error, stdout, stderr) => {   
 		if (error){
-   	          telemetria(`error: ${error.message}`);
+   	          telemetria(1,`error: ${error.message}`);
 	          return;
  	        }
 
 	        if (stderr){
-	          telemetria(`stderr: ${stderr}`);
+	          telemetria(1,`stderr: ${stderr}`);
 	          return;
 	        }	 
    	                       
@@ -146,7 +127,6 @@ function listaDispositivosUsb(){
   }
 
   function buscaDetalhesMp3(contador){	
-	telemetria('Busca arquivo '+ contador + ' de '+ itens.length);	
 	if (itens[contador].diretorio !== undefined){	
     	   try{
 	       const tags = NodeID3.read(itens[contador].diretorio.toString().replace(":",'') +"/"+ itens[contador].arquivo);
@@ -154,21 +134,23 @@ function listaDispositivosUsb(){
 	       itens[contador].title = tags.title;
 	       itens[contador].composer = tags.composer;
 	       itens[contador].artist = tags.artist; 		       
-
+	       telemetria(1,'Busca arquivo '+ contador + ' de '+ itens.length);	
 	   }catch(ex){
-	       telemetria(ex.message); 
+	       telemetria(1,ex.message); 
 	   } 
            
 	   if((contador + 1) < itens.length){	        		   	
-		       contador++;
-		       buscaDetalhesMp3(contador);	
+   	       contador++;
+	       buscaDetalhesMp3(contador);	
 	   }else{
-		       fs.writeFile("itens.json", JSON.stringify(itens), function(err) {
-			   if(err) telemetria('error', err);
+	     fs.writeFile("itens.json", JSON.stringify(itens), function(err){
+   	          if(err) 
+                    telemetria(1,'error', err);
 			 
-			   telemetria('Arquivo de itens gravado com sucesso'); 		    	 
-		       });	
-		       classificaDadosBrutos(itens);
+		  telemetria(1,'Arquivo de itens gravado com sucesso'); 		    	 
+	      });	
+              classificaDadosBrutos(itens);
+	      telemetria('3','Reativando tela'); 	
 	   }	   
 	}
   }	

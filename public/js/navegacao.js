@@ -107,3 +107,10 @@ function setaValores(itemVariavel,subItens){
         $("#musicasSel").append('<li>'+ musicaSelecionada.nome + '</li>'); 
     }
  }
+ function limparTela(){
+    $("#ulVideos").text('');            	    
+    $("#musicaSel").empty();	
+    $("#subItems").empty(); 
+    $('#txtTelemetria').text('');
+ }
+

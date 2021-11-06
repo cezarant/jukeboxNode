@@ -14,11 +14,20 @@
 
   socket.on('messageBroadcast', function(msg)
   { 
-     if(msg === "1"){
-        buscaDaAPI();       
-     }else{ 	
-       $('#txtTelemetria').text(msg);
-     }
+     switch(msg.tipo)
+     {
+	case 1: 
+	   $('#txtTelemetria').text(msg.msg);		
+	break; 
+	case 2: 
+	   limparTela();
+        break; 
+	case 3: 
+            $('#txtTelemetria').text('Reativando tela...');
+	    buscaDaAPI();       	 
+	break;	
+     }	
+    	
   });
 
   $window.keydown(event => {        
@@ -122,4 +131,5 @@
 	.fail(function(){
 		$('#txtTelemetria').text('Erro ao ler o end point de Jukebox');
 	});
-  }
+ }
+
