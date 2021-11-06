@@ -9,7 +9,7 @@ var usbDetect = require('usb-detection');
 var urlUSB        = '/';   
 var nomeDiretorio = 'listas/diretorio.json';
 var listas        = "listas/itens.json";
-var alfabeto      = 'ABCDEFGHIJLKMNOPQRSTUVWXYZ?';
+
 var intervalId; 
 var itens         = [];    
 var dicionario    = [];  
@@ -77,24 +77,18 @@ function listaDispositivosUsb(){
 	      }
            });	    
        });       
-  } 	    
-  function classificaDadosBrutos(dadosBrutos){
-   	    for(var j = 0;j< alfabeto.length;j++)
-		dicionario.push(alfabet.classPorDicionario(dadosBrutos,alfabeto[j])); 
-	    			    
-	    fs.writeFile(nomeDiretorio, JSON.stringify(dicionario), function(err) {
-		 if(err) telemetria(1,'error', err);
-		 
-		clearInterval(intervalId);		 		
-	    });		
-	    		    	 
-  }  	 	
+  } 	    	    	
+	
   function listaArquivos(){	
 	if (fs.existsSync(listas))
         { 
 	    console.log('lendo dados do arquivo de itens...'); 
-	    let rawdata = fs.readFileSync(listas);
-	    classificaDadosBrutos(JSON.parse(rawdata)); 
+ 	    dicionario = alfabet.classificaDadosBrutos(JSON.parse(fs.readFileSync(listas)));
+	    fs.writeFile(nomeDiretorio, JSON.stringify(dicionario), function(err) {
+		 if(err) telemetria(1,'error', err);
+		 
+		clearInterval(intervalId);		 		
+	    });		   
 	}else{
             exec("ls "+ urlUSB +" -1 -R", (error, stdout, stderr) => {   
 		if (error){
@@ -150,7 +144,12 @@ function listaDispositivosUsb(){
 			 
 		  telemetria(1,'Arquivo de itens gravado com sucesso'); 		    	 
 	      });	
-              classificaDadosBrutos(itens);
+              alfabet.classificaDadosBrutos(itens);
+	      fs.writeFile(nomeDiretorio, JSON.stringify(dicionario), function(err) {
+		 if(err) telemetria(1,'error', err);
+		 
+		clearInterval(intervalId);		 		
+     	      }); 	
 	      telemetria('3','Reativando tela'); 	
 	   }	   
 	}

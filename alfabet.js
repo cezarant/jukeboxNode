@@ -1,6 +1,7 @@
 const fs         = require('fs');
 const path       = require('path');
 const NodeID3    = require('node-id3');
+var alfabeto      = 'ABCDEFGHIJLKMNOPQRSTUVWXYZ?';
  
 function lendoItens(stdout){	
 	var itens = []; 	
@@ -32,7 +33,13 @@ function recuperaTagsArquivo(item){
 	 } 
 	 return item.title;
 } 
-
+function classificaDadosBrutos(dadosBrutos){
+	var dicionario = [];    	    
+	for(var j = 0;j< alfabeto.length;j++)
+		dicionario.push(this.classPorDicionario(dadosBrutos,alfabeto[j])); 
+	    			    
+	return dicionario; 	    		    	 
+}  	 
 function classPorDicionario(itensA,letra){
 	var ItemDicionario ; 
 	var BandasPorLetra = itensA.filter(x => x.artist !== undefined && x.artist.charAt(0) === letra);
@@ -62,7 +69,8 @@ function classPorDicionario(itensA,letra){
 module.exports = {
    lendoItens,
    recuperaTagsArquivo,
-   classPorDicionario	
+   classPorDicionario,
+   classificaDadosBrutos	
 };
 
 
