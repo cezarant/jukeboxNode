@@ -7,7 +7,8 @@ const alfabet  = require('./alfabet.js');
 // Constantes especificas do JukeBox 
 var usbDetect = require('usb-detection'); 
 var urlUSB        = '/';   
-var nomeDiretorio = 'diretorio.json';
+var nomeDiretorio = 'listas/diretorio.json';
+var listas        = "listas/itens.json";
 var alfabeto      = 'ABCDEFGHIJLKMNOPQRSTUVWXYZ?';
 var intervalId; 
 var itens         = [];    
@@ -89,10 +90,10 @@ function listaDispositivosUsb(){
 	    		    	 
   }  	 	
   function listaArquivos(){	
-	if (fs.existsSync('itens.json'))
+	if (fs.existsSync(listas))
         { 
 	    console.log('lendo dados do arquivo de itens...'); 
-	    let rawdata = fs.readFileSync('itens.json');
+	    let rawdata = fs.readFileSync(listas);
 	    classificaDadosBrutos(JSON.parse(rawdata)); 
 	}else{
             exec("ls "+ urlUSB +" -1 -R", (error, stdout, stderr) => {   
@@ -143,7 +144,7 @@ function listaDispositivosUsb(){
    	       contador++;
 	       buscaDetalhesMp3(contador);	
 	   }else{
-	     fs.writeFile("itens.json", JSON.stringify(itens), function(err){
+	     fs.writeFile(listas, JSON.stringify(itens), function(err){
    	          if(err) 
                     telemetria(1,'error', err);
 			 
