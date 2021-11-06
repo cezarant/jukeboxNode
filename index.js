@@ -125,14 +125,14 @@ function listaDispositivosUsb(){
    	       contador++;
 	       buscaDetalhesMp3(contador);	
 	   }else{
-	     fs.writeFile(listas, JSON.stringify(itens), function(err){
+	      fs.writeFile(listas, JSON.stringify(itens), function(err){
    	          if(err) 
                     telemetria(1,'error', err);
 			 
 		  telemetria(1,'Arquivo de itens gravado com sucesso'); 		    	 
-	      });	
+	      });
+	
               dicionario = alfabet.classificaDadosBrutos(itens);
-
 	      fs.writeFile(nomeDiretorio, JSON.stringify(dicionario), function(err) {
 		 if(err) telemetria(1,'error', err);
 		 
