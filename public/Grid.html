@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello!</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/styles.css">    
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/navegacao.js"></script>
+    <script src="socketCapture.js"></script>    
+  </head>
+  <body class="container">
+   <header>
+	<span id="txtTelemetria"></span>	
+	<p id="ulVideos"></p>
+   </header>
+   <nav>
+	<ul id="subItems"></ul>
+   </nav>
+     <main>
+   	 <video id="plTeste"  width="100%" controls="controls"></video>	  	  
+     </main>
+     <aside><ul id="musicasSel"></ul></aside>
+     <footer>
+		<input type="button" value="Avança" onclick="avancaAlfabeto()" />
+		<input type="button" value="Entra um nivel" onclick="desceNivel()" />
+		<input type="button" value="Volta um nivel" onclick="sobeNivel()" />
+		<input type="button" value="Seleciona" onclick="apagarLuzes()" />
+      </footer>
+  </body>
+</html>
+

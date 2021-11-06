@@ -1,65 +1,34 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>JukeBox Nodejs</title>
-<style>
-	.navbar{
-		margin-top: 20px;
-	}
-</style>
-</head> 
-<body>
-    <div class="container">
-		<nav class="navbar navbar-inverse">
-			<div class="navbar-header">            
-				<a href="#" class="navbar-brand">
-				   <a class="navbar-brand" id="txtNome" href="#">-</a>
-				</a>
-			</div>        
-		</nav>
-		<div class="container">
-			<div class="row">
-				  <div class="col-sm-8">
-				       <video id="plTeste"  width="100%" controls="controls"></video>	
-				  </div>
-				  <div class="col-sm-4">
-				      <p id="ulVideos"></p>
-					  <ul id="subItems"></ul>
-					  <p id="musicaSel"></p>
-					  <ul id="musicasSel"></ul>
-				  </div>
-			</div>
-		'	<div class="row">
-				  <table>
-					    <tr>
-					       <td><span> Telemetria:</span></td>
-					       <td><span  id="txtTelemetria">-</span></td>
-					    </tr>				     	
-				  </table>				  
-				  <input type="button" value="Avança" onclick="avancaAlfabeto()" />				  
-				  <input type="button" value="Entra um nivel" onclick="desceNivel()" />
-				  <input type="button" value="Volta um nivel" onclick="sobeNivel()" />	
-				  <input type="button" value="Seleciona" onclick="selecionaMusica()" />		 
-			</div>	
-		</div>
-		<div id="luzAcessa" class="luzAcesa"></div>
-               <div id="luzApagada" class="luzApagada">
-		     <div class="msg">
-			 <label style="text-align:center;color:black;font-size:18px;">Escolha uma opção...</label>					
-		     </div>
-               </div>	
-    </div>		
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" /> 	
-<link href="css/analyser.css" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
-<script src="https://code.jquery.com/jquery-3.1.1.js"></script>	
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>	
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
-<script src="js/navegacao.js"></script>
-<script src="socketCapture.js"></script>
+  <meta charset="UTF-8">
+  <title>JukeBox</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="container">
+   <header>	
+	<p id="ulVideos"></p>
+   </header>
+   <nav>
+	<ul id="subItems"></ul>
+   </nav>
+     <main>
+	 <span id="txtTelemetria"></span>	
+   	 <video id="plTeste"  width="100%" controls="controls"></video>	  	  
+     </main>
+     <aside><ul id="musicasSel"></ul></aside>
+     <footer>
+		<input type="button" value="Avança" onclick="avancaAlfabeto()" />
+		<input type="button" value="Entra um nivel" onclick="desceNivel()" />
+		<input type="button" value="Volta um nivel" onclick="sobeNivel()" />
+		<input type="button" value="Seleciona" onclick="apagarLuzes()" />
+      </footer>
+
+      <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+      <script src="/socket.io/socket.io.js"></script> 
+      <script src="/main.js"></script>
+      <script src="js/navegacao.js"></script>	
+      <link rel="stylesheet" href="css/reset.css">
+      <link rel="stylesheet" href="css/styles.css">     
 </body>
 </html>

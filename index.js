@@ -1,198 +1,230 @@
-  const express   = require('express');	
-  const app       = express();
-  var http        = require('http').Server(app);
-  var httpCrawler = require('http');
-  var io          = require('socket.io')(http);
-  var port        = process.env.PORT || 3008;
-  const path      = require('path');
-  var urlUSB      = '/media/cezar/ESD-USB/'; 
-  app.use(express.static(path.join(__dirname, 'public')));
-  app.get('/', function(req, res)
-  {
-      res.sendFile(__dirname + '/2.html');
-  });
+// Constantes gerais 
+const NodeID3     = require('node-id3');
+const { exec }    = require("child_process");
+const path        = require('path');
+const fs          = require('fs');
+// Constantes especificas do JukeBox 
+var usbDetect = require('usb-detection'); 
+var urlUSB        = '/';   
+var nomeDiretorio = 'diretorio.json';
+var alfabeto      = 'ABCDEFGHIJLKMNOPQRSTUVWXYZ?';
+var intervalId; 
+var itens         = [];    
+var dicionario    = [];  
+var telemetriaAtiva   = true; 
+function telemetria(msg){
+    if(telemetriaAtiva){ 	
+       io.emit('messageBroadcast',msg);  
+       console.log('Telemetria:',msg); 	   	
+   }
+}
+// Timer que fica o tempo todo verificando se o USB foi inserido
+function verUSBInserido(){    listaDispositivosUsb();	  }
+intervalId       = setInterval(verUSBInserido, 1500);   
+// ----------------------------------------------------------------------------------------------
+const express    = require('express');
+const app        = express();
+const server     = require('http').createServer(app);
+// Criando Servidor Socket 
+const io         = require('socket.io')(server);
+const port       = process.env.PORT || 3000;
 
-  app.get('/juke',function(req,res){
-	res.setHeader('Content-Type', 'application/json');
-	var juke = {
-		"Itens":[		
-		{
-			"Letra": "A",
-			"Bandas":[				
-				{
-					"Nome":"AeroSmith",
-					"Albuns":[
-						{"Nome":"Hole in My Soul",
-					     "Musicas":[
-							{"Nome":"Hole in My Soul","NomeVideo":"hole.mp4"},
-							{"Nome":"Pink","NomeVideo":"pink.mp4"}
-						 ]},
-						{"Nome":"Armagedoom",
-					     "Musicas": [
-							 {"Nome": "Crazy","NomeVideo": "crazy.mp4"},
-							 {"Nome":"Armagedoom","NomeVideo":"armagedom.mp4"}
-						 ]}	
-					]
-				},
-				{
-					"Nome":"Alice in Chains",
-					"Albuns":
-					[
-						{"Nome":"Black hole in Sky",
-					     "Musicas":[
-							{"Nome":"Black hole in Sky","NomeVideo":"blackhole.mp4"},
-							{"Nome":"Man in the Box","NomeVideo":"ManInABox.mp4"}
-						]}	
-					]		
-				}]
-		},
-		{
-			"Letra": "B",
-			"Bandas":[				
-				{
-					"Nome":"Black Sabbath",
-					"Albuns":[
-						{
-							"Nome":"Black Sabbath",
-							"Musicas":	[
-								{"Nome":"N.I.B"},
-								{"Nome":"Children of the Grave"}
-							]
-						},
-						{
-							"Nome":"Volume 4",
-							"Musicas": [
-								{"Nome":"Changes"},
-							    {"Nome":"SuperNaut"}		
-							]					
-						}	
-					]
-				}]
-		}
-	]};
-	res.end(JSON.stringify({
-		videos: juke
-		  }, null, 3));	     	
-  }); 
+server.listen(port, () => {     
+    usbDetect.startMonitoring();
+    usbDetect.on('add', function(){ telemetria('Pen Drive conectado...'); });	
+    usbDetect.on('remove', function(){ intervalId = setInterval(verUSBInserido, 1500); });	
+    console.log('Servidor rodando em:',port); 
+});
 
+app.use(express.static(path.join(__dirname, 'public')));
 
-  app.get('/video', function(req, res)
-  {
-      res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify({
-				videos: ['Confortably.mp4', 'video2']
-			      }, null, 3));	     
-  }); 
-  
-  http.listen(port, function()
-  {        
-    /*var usbDetect = require('usb-detection');
- 	console.log('start...'); 
- 
-	usbDetect.startMonitoring();
-	
-	usbDetect.on('add', function(device) { 
-	   mediadorCrawler(1); 	
-	});
-	
-	usbDetect.on('remove', function(device) {  mediadorCrawler(2); });
-	usbDetect.on('remove:vid', function(device) { console.log('remove', device); });
-	usbDetect.on('remove:vid:pid', function(device) { console.log('remove', device); });
-	 
-	usbDetect.on('change', function(device) { myfunction(device); });
-	usbDetect.on('change:vid', function(device) { console.log('change', device); });
-	usbDetect.on('change:vid:pid', function(device) { console.log('change', device); });*/
-	console.log('start...'); 
+io.on('connection', (socket) => {
+  let addedUser = false;   
+  socket.on('stop typing', () => {         	
+    socket.broadcast.emit('stop typing', {      
+	username: socket.username
+    });
+    console.log('teste'); 
   });  
-   
-  async function myfunction(device)
-  {     
-     // console.log('device changed:',device); 	
-     const drivelist = require('drivelist');
-     const drives = await drivelist.list();
-     
-     drives.forEach((drive) => {
-     	if(drive.busType === 'SATA')
-     	{     	   
-     	   const path = require('path');
-   	   const fs = require('fs');	
-	   const directoryPath = path.join('/', urlUSB);	   
-	   fs.readdir(directoryPath, function (err, files)
-	   { 	      
-	       if (err)
-   	          return console.log('Unable to scan directory: ' + err);
-  	        	
-	       var filesList = filescls
-		   .filter(function(e){
-    		   return path.extname(e).toLowerCase() === '.mp4'
-  	       });
-  			        	
-	       filesList.forEach(function (file) {		
-		   comunicaAoCliente('{"tipo":"file","valor":"'+ file +'"}');		   		    		
-	       });
-  	    });	  	  
-     	}  	
-     });	
+});
+// ---------------------------------------------------
+// Criando 
+function listaDispositivosUsb(){	    
+        telemetria(`Buscando dispositivo...`);
+        exec("findmnt -t vfat -o TARGET", (error, stdout, stderr) => {	   
+	   if (error){
+             telemetria(`error: ${error.message}`);
+             return;
+           }
+
+           if (stderr){
+             telemetria(`stderr: ${stderr}`);
+             return;
+           }	   
+
+	   var lines = stdout.split('\n');
+	   lines.map(function(item){	 
+   	      if((item !== 'TARGET') && (item !== '')){
+		urlUSB = item;	   
+		telemetria(urlUSB);  		
+		clearInterval(intervalId);	
+		listaArquivos();			
+	      }
+           });	    
+       });       
+  } 	  
+  function classPorDicionario(itensA,letra){
+	var BandasPorLetra = itensA.filter(x => x.artist !== undefined && x.artist.charAt(0) === letra);
+	var arrAlbuns  = Array.from(new Set(BandasPorLetra.map(x => x.album)));	
+	var Bandas = [];	
+	for(var j = 0;j< arrAlbuns.length;j++){
+	    var musicasAlbum = itensA.filter(x => x.album !== undefined && x.album === arrAlbuns[j]);		    
+	    telemetria('Preenchendo músicas nos albuns...');  	
+	    try{			
+	   	    Bandas.push(
+		    {			
+			nome: musicasAlbum.values().next().value.artist !== undefined ? 
+                              musicasAlbum.values().next().value.artist :'',
+	  		albuns:[
+		        {
+			   nome: arrAlbuns[j], 
+			   musicas: musicasAlbum.map(x => x.arquivo)
+		  	}]	
+		    }); 
+	    }catch(we){ 
+       	       telemetria('Erro lendo '+ arrAlbuns[j] +':', we.message); 
+            }	
+	}
+	dicionario.push({ letra: letra, bandas: Bandas }); 	
+  } 
+  function classificaDadosBrutos(dadosBrutos){
+   	    for(var j = 0;j< alfabeto.length;j++)
+		classPorDicionario(dadosBrutos,alfabeto[j]); 
+	    			    
+	    fs.writeFile(nomeDiretorio, JSON.stringify(dicionario), function(err) {
+		 if(err) telemetria('error', err);
+		 
+		 telemetria('1'); 		    	 
+	    });		
+  }  	 	
+  function listaArquivos(){	
+	if (fs.existsSync('itens.json'))
+        { 
+	    console.log('lendo dados do arquivo de itens...'); 
+	    let rawdata = fs.readFileSync('itens.json');
+	    classificaDadosBrutos(JSON.parse(rawdata)); 
+	}else{
+            exec("ls "+ urlUSB +" -1 -R", (error, stdout, stderr) => {   
+		if (error){
+   	          telemetria(`error: ${error.message}`);
+	          return;
+ 	        }
+
+	        if (stderr){
+	          telemetria(`stderr: ${stderr}`);
+	          return;
+	        }	 
+   	                       
+		var lines = stdout.split('\n');
+	        lines.map(function(linha){	  	
+		   item = { diretorio : '', arquivo : '',  album : '' , title : '' ,composer : '', artist : '',letra : '',bandas : [] };
+ 		   if((path.extname(linha).toLowerCase() === '.mp3') || 
+		      (path.extname(linha).toLowerCase() === '.wma') || 
+                      (path.extname(linha).toLowerCase() === '.wmv') ||
+		      (path.extname(linha).toLowerCase() === '.wav'))
+		   {
+			item.diretorio = diretorio; 	
+			item.arquivo = linha; 
+			itens.push(item);				
+		   }else{
+			diretorio = linha;
+		   }    	
+		});			 			
+		buscaDetalhesMp3(0);
+	   });
+	}
   }
-  
-  function start(res){
-     return myfunction();
-  }
-    
+
+  function buscaDetalhesMp3(contador){	
+	telemetria('Busca arquivo '+ contador + ' de '+ itens.length);	
+	if (itens[contador].diretorio !== undefined){	
+    	   try{
+	       const tags = NodeID3.read(itens[contador].diretorio.toString().replace(":",'') +"/"+ itens[contador].arquivo);
+	       itens[contador].album = tags.album;
+	       itens[contador].title = tags.title;
+	       itens[contador].composer = tags.composer;
+	       itens[contador].artist = tags.artist; 		       
+
+	   }catch(ex){
+	       telemetria(ex.message); 
+	   } 
+           
+	   if((contador + 1) < itens.length){	        		   	
+		       contador++;
+		       buscaDetalhesMp3(contador);	
+	   }else{
+		       fs.writeFile("itens.json", JSON.stringify(itens), function(err) {
+			   if(err) telemetria('error', err);
+			 
+			   telemetria('Arquivo de itens gravado com sucesso'); 		    	 
+		       });	
+		       classificaDadosBrutos(itens);
+	   }	   
+	}
+  }	
+  // API 
+  // ------------------------------------------------------------------------------------------------  
   app.get('/video/:video', function(req, res)
   {
-	  const movieName  = req.params["video"];
-	  // console.log(movieName); 
-	  const path = urlUSB + movieName
-	  const fs = require('fs');	
-	  const stat = fs.statSync(path)
-	  const fileSize = stat.size
-	  const range = req.headers.range
-	  if (range) {
-	    const parts = range.replace(/bytes=/, "").split("-")
-	    const start = parseInt(parts[0], 10)
-	    const end = parts[1] 
-	      ? parseInt(parts[1], 10)
-	      : fileSize-1
+	const movieName  = req.params["video"];	  
+	const path = urlUSB + '/AUDIO/' + movieName;
+	const fs = require('fs');	
+	const stat = fs.statSync(path)
+	const fileSize = stat.size
+	const range = req.headers.range
+	
+	if (range){
+	    const parts = range.replace(/bytes=/, "").split("-");
+	    const start = parseInt(parts[0], 10);
+	    const end = parts[1] ? parseInt(parts[1], 10) : fileSize-1;
 	    const chunksize = (end-start)+1
-	    const file = fs.createReadStream(path, {start, end})
+	    const file = fs.createReadStream(path, {start, end});
+
 	    const head = {
 	      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
 	      'Accept-Ranges': 'bytes',
 	      'Content-Length': chunksize,
-	      'Content-Type': 'video/mp4',
+	      'Content-Type': 'audio/mpeg',
 	    }
+
 	    res.writeHead(206, head);
 	    file.pipe(res);
-	  } else {
+
+	  }else{
 	    const head = {
 	      'Content-Length': fileSize,
-	      'Content-Type': 'video/mp4',
-	  }
-	    res.writeHead(200, head)
-	    fs.createReadStream(path).pipe(res)
-	  }
-  });      
-  function mediadorCrawler(msg)
-  {    
-     var status = ""; 
-   	 
-     if(msg === 1)
-       status = '{ "tipo": "conexao", "status":"connected" }'; 
-    
-     if (msg === 2)
-       status = '{ "tipo": "conexao","status":"unplugged" }';
-     	 
-     comunicaAoCliente(status);						
-  } 
-  function comunicaAoCliente(msg)
+	      'Content-Type': 'audio/mpeg',
+        }
+	
+	res.writeHead(200, head)
+	fs.createReadStream(path).pipe(res)
+
+	}
+  });        	
+  
+  app.get('/', function(req, res)
   {
-     io.emit('messageBroadcast', msg);
-  } 
-  io.on('connection', function(socket)
-  {
-     socket.on('messageBroadcast', function()
-     {	
-	mediadorCrawler('Conexão');	       
-     });
-  }); 
+      res.sendFile(__dirname + '/index.html');
+  });
+
+  app.get('/juke',function(req,res){
+	res.setHeader('Content-Type', 'application/json');	
+	fs.readFile(nomeDiretorio, "utf8", (err, jsonString) => {
+  		if (err){
+		    console.log("File read failed:", err);
+	            res.end(500);
+		}
+	        var juke = {"Itens": JSON.parse(jsonString) };
+    	        res.end(JSON.stringify({  juke  }, null, 3));	     	 
+	});	
+  }); 	

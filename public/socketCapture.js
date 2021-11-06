@@ -1,6 +1,24 @@
-  var socket = io();  
-  var media;  
-  var urlPrincipal = 'http://localhost:3008/video/';
+  const socket = io();
+  
+  $(document).ready(function(e)
+  {
+	socket.emit('stop typing');       
+	/*media=document.getElementById("plTeste");	 
+	media.addEventListener('ended', (event) => 
+	{
+		verifyStack();
+	});
+	buscaDaAPI();       
+        socket = io.connect('http://localhost:'+ porta); */
+  });    
+  socket.on('msgserv', (data) => {
+	$('#txtTelemetria').text('teste...........');	
+  });	
+ 
+
+/*  var media;  
+  var porta = 3008;  	
+  var urlPrincipal = 'http://localhost:'+ porta +'/video/';
   var statusOfConnect; 
   var selectedMovie; 
   var videoStack = [];   
@@ -9,6 +27,7 @@
   var statusDesconectado = 1; 
   var statusModal;  
   var contNivel = 0; 
+  var socket;
  
   $(document).ready(function(e)
   {
@@ -17,17 +36,8 @@
 	{
 		verifyStack();
 	});
-	buscaDaAPI();
-
-	//showOptions('unplugged');
-	
-	/*$("#myInput").on("keyup", function()
-	{
-		var value = $(this).val().toLowerCase();
-		$("#myTable tr").filter(function() {
-			$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-		});
-	});*/	
+	buscaDaAPI();       
+        socket = io.connect('http://localhost:'+ porta);	       
   });    
   
   $(document).keydown(function(e)
@@ -72,7 +82,7 @@
 	if(videoStack.length > 0)
 	{
 	   selectedMovie =  videoStack.pop();
-       playMovie();		
+       	   playMovie();		
 	} 
   }  
   function pushStack()
@@ -85,13 +95,13 @@
 		li.appendChild(document.createTextNode(selectedMovie));
 		ul.appendChild(li);	
 	}	
-  }
+  }   
   function chooseMovie(movieName)
   {
-    if(selectedMovie === undefined)
+    	if(selectedMovie === undefined)
 	{
 		selectedMovie = urlPrincipal + movieName; 
-    	playMovie();  
+	    	playMovie();  
 	}else{
 		videoStack.push(urlPrincipal + movieName);
 	} 	    
@@ -134,19 +144,19 @@
       }               	
   }
   function buscaDaAPI() {
-    $.ajax(
+        $.ajax(
 	{
 		method: "GET",
-		url: 'http://localhost:3008/juke/',
+		url: 'http://localhost:'+ porta +'/juke/',
 		data: { servico: "video"}
 	})
 	.done(function(result)
 	{		
-		for(var i=0;i< result.videos.length;i++){
-		    juke.push(result.videos[i]);
+		for(var i=0;i< result.juke.Itens.length;i++){
+		    juke.push(result.juke.Itens[i]);
 		}		
 		alfabeto = juke; 				        
-		setaValores(alfabeto[0].letra,alfabeto[0].bandas);
+		setaValores(alfabeto[0].Letra,alfabeto[0].Bandas);
 	})
 	.fail(function(){
 		alert( "Erro na busca do Serviço, contate o desenvolvedor.");
@@ -167,15 +177,8 @@
   {
     document.getElementById('luzApagada').style.display = 'none';
   }
-  /** Mostra mensagem "Carregando".....*/
   function apagarLuzes() 
   {
     document.getElementById('luzAcessa').style.display = 'block';
     document.getElementById('luzApagada').style.display = 'block';
-  }
-  socket.on('messageBroadcast', function(msg)
-  { 	
-	// console.log(msg);
-	convertMensagem(msg);	 
-	$('#txtTelemetria').text(msg);
-  });	  	   
+  }	  	   */

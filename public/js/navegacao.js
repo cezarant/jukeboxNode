@@ -9,13 +9,13 @@ function carregaAlfabeto(){
     switch(contNivel)
     {
         case 0:            
-            setaValores(alfabeto[contVariavel].Letra,alfabeto[contVariavel].Bandas);
+            setaValores(alfabeto[contVariavel].letra,alfabeto[contVariavel].bandas);
             break; 
         case 1: 
-            setaValores(alfabeto[contVariavel].Nome,alfabeto[contVariavel].Albuns);
+            setaValores(alfabeto[contVariavel].nome,alfabeto[contVariavel].albuns);
             break; 
         case 2: 
-            setaValores(alfabeto[contVariavel].Nome,alfabeto[contVariavel].Musicas);
+            setaValores(alfabeto[contVariavel].nome,alfabeto[contVariavel].musicas);
             break;    
         case 3: 
             setaValores(alfabeto[contVariavel],undefined);
@@ -37,13 +37,13 @@ function configuraAlfabeto(){
             alfabeto = juke;    
             break; 
         case 1: 
-            alfabeto = alfabeto[contVariavel].Bandas;
+            alfabeto = alfabeto[contVariavel].bandas;
             break; 
         case 2:
-            alfabeto = alfabeto[contVariavel].Albuns;    
+            alfabeto = alfabeto[contVariavel].albuns;    
             break; 
         case 3: 
-            alfabeto = alfabeto[contVariavel].Musicas;    
+            alfabeto = alfabeto[contVariavel].musicas;    
             break;
     }       
 }
@@ -77,17 +77,33 @@ function setaValores(itemVariavel,subItens){
     { 
         var urlVideo = '<a href="#" onclick="chooseMovie(\'{0}\')">'+ itemVariavel +'</a>';
         urlVideo = urlVideo.replace('{0}',itemVariavel);
-        $("#ulVideos").text(itemVariavel);    
+        $("#ulVideos").text(itemVariavel);            
         $("#subItems").empty(); 
+	
+        debugger; 
+
         for (let index = 0; index < subItens.length; index++) {
-            $("#subItems").append('<li>'+ subItens[index].Nome + '</li>'); 			
+   	    if(subItens[index].nome === undefined)
+                $("#subItems").append('<li>'+ subItens[index] + '</li>');
+ 	    else 
+                $("#subItems").append('<li>'+ subItens[index].nome + '</li>'); 			
         }	   
     }else{
         musicaSelecionada = itemVariavel;
-        $("#musicaSel").text(itemVariavel.Nome);
+	if(itemVariavel.nome === undefined)         
+           $("#musicaSel").text(itemVariavel);
+        else 
+	  $("#musicaSel").text(itemVariavel.nome);
+	
+	selecionaMusica();
     } 
  }
- function selecionaMusica(){
-    chooseMovie(musicaSelecionada.NomeVideo); 
-    $("#musicasSel").append('<li>'+ musicaSelecionada.Nome + '</li>'); 
+ function selecionaMusica(){    
+    if(musicaSelecionada.nome === undefined){         
+	chooseMovie(musicaSelecionada);	
+
+	$("#musicasSel").append('<li>'+ musicaSelecionada + '</li>');    
+    }else{ 
+        $("#musicasSel").append('<li>'+ musicaSelecionada.nome + '</li>'); 
+    }
  }
