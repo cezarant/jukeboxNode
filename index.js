@@ -9,14 +9,13 @@ var usbDetect = require('usb-detection');
 var urlUSB        = '/';   
 var nomeDiretorio = 'listas/diretorio.json';
 var listas        = "listas/itens.json";
-
 var intervalId; 
 var itens         = [];    
 var dicionario    = [];  
 var telemetriaAtiva   = true; 
 function telemetria(tipo,msg){
     if(telemetriaAtiva){ 	
-       // io.emit('messageBroadcast',{ tipo: tipo , msg: msg});  
+       io.emit('messageBroadcast',{ tipo: tipo , msg: msg});  
        console.log('Telemetria:',msg); 	   	
    }
 }
@@ -38,7 +37,7 @@ server.listen(port, () => {
       telemetria(2,'removido'); 	      	
       intervalId = setInterval(verUSBInserido, 1500); 
     });	
-    console.log('Servidor rodando em:',port); 
+    telemetria('Servidor rodando em:'+ port); 
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -49,7 +48,7 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('stop typing', {      
 	username: socket.username
     });
-    console.log('teste'); 
+    console.log('pong'); 
   });  
 });
 // ---------------------------------------------------
@@ -66,7 +65,7 @@ function listaDispositivosUsb(){
              telemetria(1,`stderr: ${stderr}`);
              return;
            }	   
-
+	
 	   var lines = stdout.split('\n');
 	   lines.map(function(item){	 
    	      if((item !== 'TARGET') && (item !== '')){
@@ -80,18 +79,22 @@ function listaDispositivosUsb(){
   } 	    	    	
 	
   function listaArquivos(){	
+	
 	if (fs.existsSync(listas))
         { 
-	    console.log('lendo dados do arquivo de itens...'); 
- 	    dicionario = alfabet.classificaDadosBrutos(JSON.parse(fs.readFileSync(listas)));
-	    
-	    fs.writeFile(nomeDiretorio, JSON.stringify(dicionario), function(err) {
-		 if(err) telemetria(1,'error', err);
-		 
-		clearInterval(intervalId);		 		
-	    });		   
+	    if (!fs.existsSync(listas)){	    
+		console.log('lendo dados do arquivo de itens...'); 
+	 	dicionario = alfabet.classificaDadosBrutos(JSON.parse(fs.readFileSync(listas)));
+		    
+		fs.writeFile(nomeDiretorio, JSON.stringify(dicionario), function(err) {
+		   if(err) telemetria(1,'error', err);			 		   		 		
+		});	
+	    }else{
+		telemetria('3','Reativando tela'); 
+	    } 	   
+	    clearInterval(intervalId);	
 	}else{
-            exec("ls "+ urlUSB +" -1 -R", (error, stdout, stderr) => {   
+            exec("cd "+ urlUSB  +" && find -print", (error, stdout, stderr) => {   
 		if (error){
    	          telemetria(1,`error: ${error.message}`);
 	          return;
@@ -100,9 +103,8 @@ function listaDispositivosUsb(){
 	        if (stderr){
 	          telemetria(1,`stderr: ${stderr}`);
 	          return;
-	        }	    	                       
- 		itens = alfabet.lendoItens(stdout); 
-		console.log('itens:',itens); 		
+	        }	    	                        		
+		itens = alfabet.lendoItens(stdout); 		
 		buscaDetalhesMp3(0);
 	   });
 	}
@@ -111,12 +113,14 @@ function listaDispositivosUsb(){
   function buscaDetalhesMp3(contador){	
 	if (itens[contador].diretorio !== undefined){	
     	   try{
-	       const tags = NodeID3.read(itens[contador].diretorio.toString().replace(":",'') +"/"+ itens[contador].arquivo);
+  	       console.log(urlUSB + '/'+ itens[contador].diretorio.toString().replace(":",'') +"/"+ itens[contador].arquivo);	       
+               const tags = NodeID3.read(urlUSB + '/'+ itens[contador].diretorio.toString().replace(":",'') +"/"+ itens[contador].arquivo);
+	       itens[contador].metamusica = { diretorio: itens[contador].diretorio.toString().replace(":",''), nome : itens[contador].arquivo }; 	
 	       itens[contador].album = tags.album;
 	       itens[contador].title = tags.title;
 	       itens[contador].composer = tags.composer;
 	       itens[contador].artist = tags.artist; 		       
-	       telemetria(1,'Busca arquivo '+ contador + ' de '+ itens.length);	
+	       // telemetria(1,'Busca arquivo '+ contador + ' de '+ itens.length);	
 	   }catch(ex){
 	       telemetria(1,ex.message); 
 	   } 
@@ -144,14 +148,19 @@ function listaDispositivosUsb(){
   }	
   // API 
   // ------------------------------------------------------------------------------------------------  
-  app.get('/video/:video', function(req, res)
+  app.get('/video/:diretorio/:video', function(req, res)
   {
 	const movieName  = req.params["video"];	  
-	const path = urlUSB + '/AUDIO/' + movieName;
+	const dir = req.params["diretorio"];
+        console.log('dir:',dir); 
+	console.log('video:',dir); 
+
+	const path = urlUSB + '/'+ dir +'/' +  movieName;
 	const fs = require('fs');	
 	const stat = fs.statSync(path)
 	const fileSize = stat.size
 	const range = req.headers.range
+	console.log(movieName); 
 	
 	if (range){
 	    const parts = range.replace(/bytes=/, "").split("-");

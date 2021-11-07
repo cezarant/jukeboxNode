@@ -1,4 +1,3 @@
-const fs         = require('fs');
 const path       = require('path');
 const NodeID3    = require('node-id3');
 var alfabeto      = 'ABCDEFGHIJLKMNOPQRSTUVWXYZ?';
@@ -6,18 +5,26 @@ var alfabeto      = 'ABCDEFGHIJLKMNOPQRSTUVWXYZ?';
 function lendoItens(stdout){	
 	var itens = []; 	
 	var lines = stdout.split('\n');
-	lines.map(function(linha){	  	
-	        item = { diretorio : '', arquivo : '',  album : '' , title : '' ,composer : '', artist : '',letra : '',bandas : [] };
-	 	if((path.extname(linha).toLowerCase() === '.mp3') || 
-		   (path.extname(linha).toLowerCase() === '.wma') || 
-	           (path.extname(linha).toLowerCase() === '.wmv') ||
-		   (path.extname(linha).toLowerCase() === '.wav')){
-			item.diretorio = diretorio; 	
-			item.arquivo = linha; 
-			itens.push(item);				
-	        }else{
-		        diretorio = linha;
-        	}    				
+	lines.map(function(linha){	                                
+		linha = linha.replace('./','').split('/');
+		var vet = linha;
+		var diretorioExt = '';  
+		if (vet.length > 1){	           		    
+		    diretorioExt = vet[0];	
+		    linha = vet[1];	   
+		    item = { diretorio : '', arquivo : '',  album : '' , title : '' ,composer : '', artist : '',letra : '',bandas : [] };		
+		    try{
+		        console.log(path.extname(linha)); 
+			if((path.extname(linha).toLowerCase() === '.mp3') || 
+			   (path.extname(linha).toLowerCase() === '.wma') || 
+		           (path.extname(linha).toLowerCase() === '.wmv') ||
+			   (path.extname(linha).toLowerCase() === '.wav')){
+				item.diretorio = diretorioExt; 	
+				item.arquivo = linha; 
+				itens.push(item);				
+	                }	
+    	            }catch(excep){   }
+		} 			          				
 	});
 	return itens; 
 }
@@ -41,7 +48,8 @@ function classificaDadosBrutos(dadosBrutos){
 	return dicionario; 	    		    	 
 }  	 
 function classPorDicionario(itensA,letra){
-	var ItemDicionario ; 
+	var ItemDicionario; 
+	var metaDadosMusica; 
 	var BandasPorLetra = itensA.filter(x => x.artist !== undefined && x.artist.charAt(0) === letra);
 	var arrAlbuns  = Array.from(new Set(BandasPorLetra.map(x => x.album)));	
 	var Bandas = [];	
@@ -55,7 +63,7 @@ function classPorDicionario(itensA,letra){
 	  		albuns:[
 		        {
 			   nome: arrAlbuns[j], 
-			   musicas: musicasAlbum.map(x => x.arquivo)
+			   musicas: musicasAlbum.map(x => x.metamusica)
 		  	}]	
 		    }); 		    
 	    }catch(we){ 

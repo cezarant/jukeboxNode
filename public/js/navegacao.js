@@ -99,13 +99,11 @@ function setaValores(itemVariavel,subItens){
     } 
  }
  function selecionaMusica(){    
-    if(musicaSelecionada.nome === undefined){         
-	chooseMovie(musicaSelecionada);	
-
+    chooseMovie(musicaSelecionada.diretorio,musicaSelecionada.nome);	 	    
+    if(musicaSelecionada.nome === undefined)         
 	$("#musicasSel").append('<li>'+ musicaSelecionada + '</li>');    
-    }else{ 
-        $("#musicasSel").append('<li>'+ musicaSelecionada.nome + '</li>'); 
-    }
+    else 
+        $("#musicasSel").append('<li>'+ musicaSelecionada.nome + '</li>');     
  }
  function limparTela(){
     $("#ulVideos").text('');            	    
