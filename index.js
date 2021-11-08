@@ -112,13 +112,14 @@ function listaDispositivosUsb(){
 	if (itens[contador].diretorio !== undefined){	
     	   try{
 	       const tags = NodeID3.read(itens[contador].diretorio.toString().replace(":",'') +"/"+ itens[contador].arquivo);
+	       itens[contador].metamusica = { diretorio: itens[contador].diretorio.toString().replace(":",''), nome : itens[contador].arquivo }; 	
 	       itens[contador].album = tags.album;
 	       itens[contador].title = tags.title;
 	       itens[contador].composer = tags.composer;
 	       itens[contador].artist = tags.artist; 		       
 	       telemetria(1,'Busca arquivo '+ contador + ' de '+ itens.length);	
 	   }catch(ex){
-	       telemetria(1,ex.message); 
+	       telemetria(1,'buscaDetalhesMp3:' + ex.message); 
 	   } 
            
 	   if((contador + 1) < itens.length){	        		   	
@@ -146,8 +147,21 @@ function listaDispositivosUsb(){
   // ------------------------------------------------------------------------------------------------  
   app.get('/video/:video', function(req, res)
   {
+	exec("find . -name '"+ req.params["video"]  +"'", (error, stdout, stderr) => {   
+  	       if (error){
+   	        telemetria(1,`error: ${error.message}`);
+	          return;
+ 	        }
+
+	        if (stderr){
+	          telemetria(1,`stderr: ${stderr}`);
+	          return;
+	        }	    	                          
+	
+
 	const movieName  = req.params["video"];	  
-	const path = urlUSB + '/AUDIO/' + movieName;
+	const path = urlUSB +'/'+ stdout.replace('.','');
+	console.log('Path:',path); 
 	const fs = require('fs');	
 	const stat = fs.statSync(path)
 	const fileSize = stat.size
@@ -180,6 +194,8 @@ function listaDispositivosUsb(){
 	fs.createReadStream(path).pipe(res)
 
 	}
+      });
+
   });        	
   
   app.get('/', function(req, res)

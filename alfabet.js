@@ -1,4 +1,3 @@
-const fs         = require('fs');
 const path       = require('path');
 const NodeID3    = require('node-id3');
 var alfabeto      = 'ABCDEFGHIJLKMNOPQRSTUVWXYZ?';
@@ -17,9 +16,9 @@ function lendoItens(stdout){
 			itens.push(item);				
 	        }else{
 		        diretorio = linha;
-        	}    				
+        	}    			
 	});
-	return itens; 
+	return itens; 	
 }
 function recuperaTagsArquivo(item){
   	 try{
@@ -38,29 +37,38 @@ function classificaDadosBrutos(dadosBrutos){
 	for(var j = 0;j< alfabeto.length;j++)
 		dicionario.push(this.classPorDicionario(dadosBrutos,alfabeto[j])); 
 	    			    
+	console.log('Dicionario',dicionario); 	
 	return dicionario; 	    		    	 
 }  	 
 function classPorDicionario(itensA,letra){
-	var ItemDicionario ; 
+	var ItemDicionario; 
+	var metaDadosMusica; 
 	var BandasPorLetra = itensA.filter(x => x.artist !== undefined && x.artist.charAt(0) === letra);
-	var arrAlbuns  = Array.from(new Set(BandasPorLetra.map(x => x.album)));	
-	var Bandas = [];	
-	for(var j = 0;j< arrAlbuns.length;j++){
-	    var musicasAlbum = itensA.filter(x => x.album !== undefined && x.album === arrAlbuns[j]);		    	    
-	    try{			
-	   	    Bandas.push(
-		    {			
-			nome: musicasAlbum.values().next().value.artist !== undefined ? 
-                              musicasAlbum.values().next().value.artist :'',
-	  		albuns:[
-		        {
-			   nome: arrAlbuns[j], 
-			   musicas: musicasAlbum.map(x => x.arquivo)
-		  	}]	
-		    }); 		    
-	    }catch(we){ 
-       	       console.log('Erro'+ we.message); 
-            }	
+	var BandasSemDuplicata = []; 
+	var Bandas = []; 
+	console.log('=================================================================');
+	console.log('Letra:',letra); 
+
+	if(BandasPorLetra.length > 0){  
+	   // Remove as duplicatas por causa de bandas que tem mais de um Album. 
+   	   BandasSemDuplicata = Array.from(new Set(BandasPorLetra.map(x => x.artist)));		         	   
+	}
+	for(var j = 0;j < BandasSemDuplicata.length;j++){	    
+	 	var Banda  =  { nome :'', albuns: [] }; 
+		Banda.nome = BandasSemDuplicata[j];             	
+		var albuns = BandasPorLetra.filter(x => x.album !== undefined && x.artist === Banda.nome);
+		console.log('-------------------------------------------');                
+		console.log('Albuns:',albuns);         		    	    		
+		for(var k =0;k < albuns.length;k++){			
+			Banda.albuns.push(
+			{
+			   nome: albuns[k].album, 
+			   musicas: albuns.map(x => x.metamusica)
+		  	}); 
+		}
+		console.log('-------------------------------------------');  
+		console.log('Banda:',Banda); 
+	        Bandas.push(Banda);	    
 	}
 	itemDicionario = { letra: letra, bandas: Bandas };	
 	return itemDicionario; 		
