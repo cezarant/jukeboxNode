@@ -22,7 +22,7 @@ function telemetria(tipo,msg){
 }
 // Timer que fica o tempo todo verificando se o USB foi inserido
 function verUSBInserido(){    listaDispositivosUsb();	  }
-intervalId       = setInterval(verUSBInserido, 1500);   
+// intervalId       = setInterval(verUSBInserido, 1500);   
 // ----------------------------------------------------------------------------------------------
 const express    = require('express');
 const app        = express();
@@ -32,13 +32,14 @@ const io         = require('socket.io')(server);
 const port       = process.env.PORT || 3000;
 
 server.listen(port, () => {     
-    usbDetect.startMonitoring();
+    /*usbDetect.startMonitoring();
     usbDetect.on('add', function(){ telemetria(1,'Pen Drive conectado...'); });	
     usbDetect.on('remove', function(){ 
       telemetria(2,'removido'); 	      	
       intervalId = setInterval(verUSBInserido, 1500); 
     });	
-    console.log('Servidor rodando em:',port); 
+    console.log('Servidor rodando em:',port); */
+    listaChaptersDvd();	
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -54,6 +55,28 @@ io.on('connection', (socket) => {
 });
 // ---------------------------------------------------
 // Criando 
+function listaChaptersDvd(){
+    exec("blkid && lsdvd -c -Ox /dev/sr0 > 1.xml", (error, stdout, stderr) => {	   
+	   if (error){
+             telemetria(1,`error: ${error.message}`);
+             // return;
+           }
+
+           if (stderr){
+             telemetria(1,`stderr: ${stderr}`);
+             // return;
+           }	   
+	   var parser = require('xml2json');
+	   fs.readFile('1.xml', function(err, data) {		
+        	var json = JSON.parse(parser.toJson(data, {reversible: true}));
+		var tracks = json.lsdvd.track;
+		var item = { 'Nome': json.lsdvd.title, chapters: tracks.map(x => x.chapter) };		  					 
+		console.log("Item:", item.chapters[0].map(y => y.startcell) );
+	   });	
+    }); 
+}
+
+
 function listaDispositivosUsb(){	    
         telemetria(1,`Buscando dispositivo...`);
         exec("findmnt -t vfat -o TARGET", (error, stdout, stderr) => {	   
