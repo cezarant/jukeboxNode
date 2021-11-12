@@ -10,6 +10,7 @@ function lendoItens(stdout){
 	 	if((path.extname(linha).toLowerCase() === '.mp3') || 
 		   (path.extname(linha).toLowerCase() === '.wma') || 
 	           (path.extname(linha).toLowerCase() === '.wmv') ||
+	           (path.extname(linha).toLowerCase() === '.mp4') ||
 		   (path.extname(linha).toLowerCase() === '.wav')){
 			item.diretorio = diretorio; 	
 			item.arquivo = linha; 

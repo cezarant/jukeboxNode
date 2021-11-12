@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JukeBox</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="container">
+   <header>	
+	<p id="ulVideos"></p>
+   </header>
+   <nav>
+	<ul id="subItems"></ul>
+   </nav>
+     <main>
+	 <span id="txtTelemetria"></span>	
+   	 <video id="plTeste"  width="100%" controls="controls"></video>	  	  
+     </main>
+     <aside><ul id="musicasSel"></ul></aside>
+     <footer>
+		<input type="button" value="Avança" onclick="avancaAlfabeto()" />
+		<input type="button" value="Entra um nivel" onclick="desceNivel()" />
+		<input type="button" value="Volta um nivel" onclick="sobeNivel()" />
+		<input type="button" value="Seleciona" onclick="apagarLuzes()" />
+      </footer>
+
+      <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+      <script src="/socket.io/socket.io.js"></script> 
+      <script src="/main.js"></script>
+      <script src="js/navegacao.js"></script>	
+      <link rel="stylesheet" href="css/reset.css">
+      <link rel="stylesheet" href="css/styles.css">     
+</body>
+</html>

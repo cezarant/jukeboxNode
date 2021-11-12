@@ -1,3 +1,4 @@
+var intervalId; 
 // Constantes gerais 
 const NodeID3     = require('node-id3');
 const { exec }    = require("child_process");
@@ -9,8 +10,9 @@ var usbDetect = require('usb-detection');
 var urlUSB        = '/';   
 var nomeDiretorio = 'listas/diretorio.json';
 var listas        = "listas/itens.json";
-
-var intervalId; 
+var comandos      = [];
+var comandosTag   = [];
+var comandosFFMpeg = [];
 var itens         = [];    
 var dicionario    = [];  
 var telemetriaAtiva   = true; 
@@ -22,7 +24,7 @@ function telemetria(tipo,msg){
 }
 // Timer que fica o tempo todo verificando se o USB foi inserido
 function verUSBInserido(){    listaDispositivosUsb();	  }
-// intervalId       = setInterval(verUSBInserido, 1500);   
+intervalId       = setInterval(verUSBInserido, 1500);   
 // ----------------------------------------------------------------------------------------------
 const express    = require('express');
 const app        = express();
@@ -32,14 +34,24 @@ const io         = require('socket.io')(server);
 const port       = process.env.PORT || 3000;
 
 server.listen(port, () => {     
-    /*usbDetect.startMonitoring();
+    usbDetect.startMonitoring();
     usbDetect.on('add', function(){ telemetria(1,'Pen Drive conectado...'); });	
     usbDetect.on('remove', function(){ 
       telemetria(2,'removido'); 	      	
       intervalId = setInterval(verUSBInserido, 1500); 
     });	
-    console.log('Servidor rodando em:',port); */
-    listaChaptersDvd();	
+    console.log('Servidor rodando em:',port);
+   // listaChaptersDvd();	
+   /*var titulo = 'Hugo Pena e Gabriel';	
+   for(var i=0; i < 25;i++){				
+      		   comandosTag.push('ffmpeg -i Track'        + (i + 1) +
+                                    '.mp4 -metadata album="' + titulo  +
+		                    '" -metadata title="'    + titulo  + 
+                                    '" -metadata artist="'   + titulo  +
+                                    '" -c copy Track_'       + (i + 1) + '.mp4');
+
+   }	
+   colocaTagsEmArquivoMp4(0);*/
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -57,26 +69,61 @@ io.on('connection', (socket) => {
 // Criando 
 function listaChaptersDvd(){
     exec("blkid && lsdvd -c -Ox /dev/sr0 > 1.xml", (error, stdout, stderr) => {	   
-	   if (error){
-             telemetria(1,`error: ${error.message}`);
-             // return;
-           }
+	   if (error)
+             telemetria(1,`error: ${error.message}`);                      
 
-           if (stderr){
+           if (stderr)
              telemetria(1,`stderr: ${stderr}`);
-             // return;
-           }	   
+           	   
 	   var parser = require('xml2json');
-	   fs.readFile('1.xml', function(err, data) {		
+	   fs.readFile('1.xml', function(err, data)
+           {		
         	var json = JSON.parse(parser.toJson(data, {reversible: true}));
 		var tracks = json.lsdvd.track;
 		var item = { 'Nome': json.lsdvd.title, chapters: tracks.map(x => x.chapter) };		  					 
-		console.log("Item:", item.chapters[0].map(y => y.startcell) );
-	   });	
-    }); 
+		var cells = item.chapters[0].map(y => y.startcell);	
+		for(var i=0; i < cells.length;i++){		
+		   console.log('Indice:', i);  
+                   comandos.push('HandBrakeCLI -i /dev/sr0 -t 1 -c '+ (i + 1) +'  -e x264 -b 1000 -r 29.97 -w 480 -o Track'+ (i + 1) +'.mp4');
+                }			
+		recortaChapter(0);	
+	   });		   
+    });     
 }
+function recortaChapter(contador){
+    console.log(comandos[contador]); 	
+    exec(comandos[contador], (error, stdout, stderr) => {	   
+	   if (error)
+             telemetria(1,`error: ${error.message}`);                        
 
+           if (stderr)
+             telemetria(1,`stderr: ${stderr}`);             
+          	      
+ 	   if(contador < comandos.length){
+              contador++;
+              recortaChapter(contador);   
+           }else{
+              colocaTagsEmArquivoMp4(0);
+           }  		   
+    });	
+}
+function colocaTagsEmArquivoMp4(contador){
+    exec(comandosTag[contador], (error, stdout, stderr) => {	   
+	   if (error)
+             telemetria(1,`error: ${error.message}`);           
 
+           if (stderr)
+             telemetria(1,`stderr: ${stderr}`);
+           	      
+ 	   if((contador + 1) < comandosTag.length){
+	      console.log('Capitulo', contador); 
+	      contador++;
+	      colocaTagsEmArquivoMp4(contador);
+           }else{
+	      console.log('Fim...'); 	
+	   } 		
+   });    	
+}
 function listaDispositivosUsb(){	    
         telemetria(1,`Buscando dispositivo...`);
         exec("findmnt -t vfat -o TARGET", (error, stdout, stderr) => {	   
@@ -93,6 +140,7 @@ function listaDispositivosUsb(){
 	   var lines = stdout.split('\n');
 	   lines.map(function(item){	 
    	      if((item !== 'TARGET') && (item !== '')){
+		console.log('Bora...'); 		
 		urlUSB = item;	   
 		telemetria(urlUSB);  		
 		clearInterval(intervalId);	
@@ -133,23 +181,41 @@ function listaDispositivosUsb(){
 
   function buscaDetalhesMp3(contador){	
 	if (itens[contador].diretorio !== undefined){	
-    	   try{
-	       const tags = NodeID3.read(itens[contador].diretorio.toString().replace(":",'') +"/"+ itens[contador].arquivo);
-	       itens[contador].metamusica = { diretorio: itens[contador].diretorio.toString().replace(":",''), nome : itens[contador].arquivo }; 	
-	       itens[contador].album = tags.album;
-	       itens[contador].title = tags.title;
-	       itens[contador].composer = tags.composer;
-	       itens[contador].artist = tags.artist; 		       
-	       telemetria(1,'Busca arquivo '+ contador + ' de '+ itens.length);	
-	   }catch(ex){
-	       telemetria(1,'buscaDetalhesMp3:' + ex.message); 
-	   } 
+	var exiftoolComando = "exiftool -j \""+ itens[contador].diretorio.toString().replace(":",'') +"/"+ itens[contador].arquivo +"\"";
+	   comandosFFMpeg.push(exiftoolComando); 
+	   console.log(exiftoolComando); 
            
 	   if((contador + 1) < itens.length){	        		   	
    	       contador++;
 	       buscaDetalhesMp3(contador);	
 	   }else{
-	      fs.writeFile(listas, JSON.stringify(itens), function(err){
+	       console.log('Fim do empilhamento de comandos de ffmpeg'); 	
+	       executaComandosFFMpeg(0);
+	   }	   
+	}
+  }
+  function executaComandosFFMpeg(contador){
+      exec(comandosFFMpeg[contador], (error, stdout, stderr) => {	   
+	   if (error)
+             telemetria(1,`error: ${error.message}`);           
+
+           if (stderr)
+             telemetria(1,`stderr: ${stderr}`);
+           
+	   try{ 	
+		let metaTags = JSON.parse(stdout);
+	        console.log('Album',metaTags[0].Album);  			       
+		itens[contador].metamusica = { diretorio: itens[contador].diretorio.toString().replace(":",''), nome : itens[contador].arquivo }; 	
+	        itens[contador].album = metaTags[0].Album;
+	        itens[contador].title = metaTags[0].Title;
+	        itens[contador].artist = metaTags[0].Artist; 		       
+           }catch(e){}
+
+ 	   if((contador + 1) < comandosFFMpeg.length){
+	      contador++;
+	      executaComandosFFMpeg(contador);		
+	   }else{              
+		fs.writeFile(listas, JSON.stringify(itens), function(err){
    	          if(err) 
                     telemetria(1,'error', err);
 			 
@@ -162,31 +228,17 @@ function listaDispositivosUsb(){
 		 
 		  clearInterval(intervalId);		 		
      	      }); 	
-	      telemetria('3','Reativando tela'); 	
-	   }	   
-	}
+	      telemetria('3','Reativando tela');	
+	   }  	
+      });
   }	
   // API 
   // ------------------------------------------------------------------------------------------------  
-  app.get('/video/:video', function(req, res)
+  app.get('/video/', function(req, res)
   {
-	exec("find . -name '"+ req.params["video"]  +"'", (error, stdout, stderr) => {   
-  	       if (error){
-   	        telemetria(1,`error: ${error.message}`);
-	          return;
- 	        }
-
-	        if (stderr){
-	          telemetria(1,`stderr: ${stderr}`);
-	          return;
-	        }	    	                          
-	
-
-	const movieName  = req.params["video"];	  
-	const path = urlUSB +'/'+ stdout.replace('.','');
-	console.log('Path:',path); 
 	const fs = require('fs');	
-	const stat = fs.statSync(path)
+	const path = req.query.video;
+	const stat = fs.statSync(path);
 	const fileSize = stat.size
 	const range = req.headers.range
 	
@@ -201,24 +253,19 @@ function listaDispositivosUsb(){
 	      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
 	      'Accept-Ranges': 'bytes',
 	      'Content-Length': chunksize,
-	      'Content-Type': 'audio/mpeg',
+	      'Content-Type': 'video/mp4'
 	    }
-
 	    res.writeHead(206, head);
 	    file.pipe(res);
 
 	  }else{
 	    const head = {
 	      'Content-Length': fileSize,
-	      'Content-Type': 'audio/mpeg',
-        }
-	
-	res.writeHead(200, head)
-	fs.createReadStream(path).pipe(res)
-
+	      'Content-Type': 'video/mp4'
+          }	
+	  res.writeHead(200, head)
+  	  fs.createReadStream(path).pipe(res)
 	}
-      });
-
   });        	
   
   app.get('/', function(req, res)

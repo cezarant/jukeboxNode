@@ -2,7 +2,7 @@
   const socket = io();
   var media;  
   var porta = 3000;  	
-  var urlPrincipal = 'http://localhost:'+ porta +'/video/';
+  var urlPrincipal = 'http://localhost:'+ porta +'/video';
   var statusOfConnect; 
   var selectedMovie; 
   var videoStack = [];   
@@ -69,7 +69,8 @@
   {
     	if(selectedMovie === undefined)
 	{
-		selectedMovie = urlPrincipal + movieName; 
+		debugger; 		
+		selectedMovie = urlPrincipal +'/?video='+ movieName.diretorio +'/'+ movieName.nome; 
 	    	playMovie();  
 	}else{
 		videoStack.push(urlPrincipal + movieName);
@@ -78,6 +79,7 @@
   function playMovie(){
 	if(media.paused)
 	{
+	   debugger; 		   
 	   console.log('selectedMovie',selectedMovie); 
 	   media.removeAttribute("src"); 
 	   media.setAttribute('src', selectedMovie);	

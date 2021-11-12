@@ -79,8 +79,6 @@ function setaValores(itemVariavel,subItens){
         urlVideo = urlVideo.replace('{0}',itemVariavel);
         $("#ulVideos").text(itemVariavel);            
         $("#subItems").empty(); 
-	
-        debugger; 
 
         for (let index = 0; index < subItens.length; index++) {
    	    if(subItens[index].nome === undefined)
@@ -99,13 +97,14 @@ function setaValores(itemVariavel,subItens){
     } 
  }
  function selecionaMusica(){    
-    if(musicaSelecionada.nome === undefined){         
+    chooseMovie(musicaSelecionada);	
+    /*if(musicaSelecionada.nome === undefined){         
 	chooseMovie(musicaSelecionada);	
 
 	$("#musicasSel").append('<li>'+ musicaSelecionada + '</li>');    
     }else{ 
         $("#musicasSel").append('<li>'+ musicaSelecionada.nome + '</li>'); 
-    }
+    }*/
  }
  function limparTela(){
     $("#ulVideos").text('');            	    
