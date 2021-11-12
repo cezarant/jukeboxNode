@@ -1,5 +1,5 @@
   const $window = $(window);
-  const socket = io();
+  // const socket = io();
   var media;  
   var porta = 3000;  	
   var urlPrincipal = 'http://localhost:'+ porta +'/video';
@@ -12,7 +12,7 @@
   var statusModal;  
   var contNivel = 0;
 
-  socket.on('messageBroadcast', function(msg)
+  /*socket.on('messageBroadcast', function(msg)
   { 
      switch(msg.tipo)
      {
@@ -26,15 +26,14 @@
             $('#txtTelemetria').text('Reativando tela...');
 	    buscaDaAPI();       	 
 	break;	
-     }	
-    	
+     }	    	
   });
 
   $window.keydown(event => {        
     if (event.which === 13) {
         socket.emit('stop typing');        
     }
-  });
+  });*/
   
   $(document).ready(function(e)
   {
