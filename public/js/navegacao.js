@@ -3,7 +3,8 @@ var juke = [];
 var contNivel = 0;  
 var contVariavel = 0; 
 var contEstatico = 0; 
-var musicaSelecionada; 
+var musicaSelecionada = undefined; 
+var musicaCorrente ; 
 
 function carregaAlfabeto(){
     switch(contNivel)
@@ -86,25 +87,23 @@ function setaValores(itemVariavel,subItens){
  	    else 
                 $("#subItems").append('<li>'+ subItens[index].nome + '</li>'); 			
         }	   
-    }else{
-        musicaSelecionada = itemVariavel;
-	if(itemVariavel.nome === undefined)         
-           $("#musicaSel").text(itemVariavel);
-        else 
-	  $("#musicaSel").text(itemVariavel.nome);
-	
-	selecionaMusica();
+    }else{       			
+	if(itemVariavel.nome === undefined){         
+           $("#musicaCorrente").text(itemVariavel);           
+	   musicaCorrente = itemVariavel;	
+        }else{ 
+	  $("#musicaCorrente").text(itemVariavel.nome);
+	  musicaCorrente = itemVariavel;	 
+        }
     } 
  }
  function selecionaMusica(){    
-    chooseMovie(musicaSelecionada);	
-    /*if(musicaSelecionada.nome === undefined){         
-	chooseMovie(musicaSelecionada);	
-
-	$("#musicasSel").append('<li>'+ musicaSelecionada + '</li>');    
-    }else{ 
-        $("#musicasSel").append('<li>'+ musicaSelecionada.nome + '</li>'); 
-    }*/
+	if(musicaSelecionada === undefined){ 	  	
+	   musicaSelecionada = musicaCorrente; 
+           chooseMovie(musicaSelecionada);
+        }else{
+	   $("#musicasSel").append('<li>'+ musicaCorrente.nome + '</li>');   	
+	} 
  }
  function limparTela(){
     $("#ulVideos").text('');            	    

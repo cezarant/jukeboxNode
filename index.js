@@ -239,8 +239,8 @@ function listaDispositivosUsb(){
 	const fs = require('fs');	
 	const path = req.query.video;
 	const stat = fs.statSync(path);
-	const fileSize = stat.size
-	const range = req.headers.range
+	const fileSize = stat.size;
+	const range = req.headers.range;
 	
 	if (range){
 	    const parts = range.replace(/bytes=/, "").split("-");

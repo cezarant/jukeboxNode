@@ -16,12 +16,14 @@
 	 <span id="txtTelemetria"></span>	
    	 <video id="plTeste"  width="100%" controls="controls"></video>	  	  
      </main>
-     <aside><ul id="musicasSel"></ul></aside>
+     <aside>
+	<span id="musicaCorrente"></span>
+	<ul id="musicasSel">Teste</ul></aside>
      <footer>
 		<input type="button" value="Avança" onclick="avancaAlfabeto()" />
 		<input type="button" value="Entra um nivel" onclick="desceNivel()" />
 		<input type="button" value="Volta um nivel" onclick="sobeNivel()" />
-		<input type="button" value="Seleciona" onclick="apagarLuzes()" />
+		<input type="button" value="Seleciona" onclick="selecionaMusica()" />
       </footer>
 
       <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
