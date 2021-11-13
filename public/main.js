@@ -66,14 +66,12 @@
   }   
   function chooseMovie(movieName)
   {
-    	if(selectedMovie === undefined)
-	{
-		debugger; 		
-		selectedMovie = urlPrincipal +'/?video='+ movieName.diretorio +'/'+ movieName.nome; 
-	    	playMovie();  
+    	if(selectedMovie === undefined){			
+	   selectedMovie = urlPrincipal +'/?video='+ movieName.diretorio +'/'+ movieName.nome;
+	   playMovie();  
 	}else{
-		videoStack.push(urlPrincipal + movieName);
-	} 	    
+	   videoStack.push(urlPrincipal +'/?video='+ movieName.diretorio +'/'+ movieName.nome);	 	    
+        }
   }
   function playMovie(){
 	if(media.paused)

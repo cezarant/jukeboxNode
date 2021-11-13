@@ -97,13 +97,11 @@ function setaValores(itemVariavel,subItens){
         }
     } 
  }
- function selecionaMusica(){    
-	if(musicaSelecionada === undefined){ 	  	
-	   musicaSelecionada = musicaCorrente; 
-           chooseMovie(musicaSelecionada);
-        }else{
-	   $("#musicasSel").append('<li>'+ musicaCorrente.nome + '</li>');   	
-	} 
+ function selecionaMusica(){
+      musicaSelecionada = musicaCorrente; 
+      chooseMovie(musicaSelecionada);
+      $("#musicasSel").append('<li>'+ musicaCorrente.nome + '</li>');   	
+	 
  }
  function limparTela(){
     $("#ulVideos").text('');            	    
